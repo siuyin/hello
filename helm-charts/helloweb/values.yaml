@@ -28,3 +28,5 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+OCAgentAddress: "192.168.1.68:55678"

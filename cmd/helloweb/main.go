@@ -25,10 +25,11 @@ func main() {
 	}()
 
 	// oce: open census exporter agent
+	ocAgentAddress := dflt.EnvString("OC_AGENT_ADDRESS", "192.168.1.68:55678")
 	oce, err := ocagent.NewExporter(
 		ocagent.WithInsecure(),
 		ocagent.WithReconnectionPeriod(5*time.Second),
-		ocagent.WithAddress("192.168.1.68:55678"), // Only included here for demo purposes.
+		ocagent.WithAddress(ocAgentAddress), // Only included here for demo purposes.
 		ocagent.WithServiceName("helloweb"))
 	if err != nil {
 		log.Fatalf("Failed to create ocagent-exporter: %v", err)

@@ -16,15 +16,17 @@ spec:
       value: {{ .Values.Subject }}
     - name: NATS_STREAMING_CLUSTER_ID
       value: helloweb
+    - name: OC_AGENT_ADDRESS
+      value: {{ .Values.OCAgentAddress }}
     livenessProbe:
       httpGet:
         path: /liveness
         port: 8080
-      initialDelaySeconds: 30
+      initialDelaySeconds: 1
       periodSeconds: 30
     readinessProbe:
       httpGet:
         path: /readiness
         port: 8080
       initialDelaySeconds: 2
-      periodSeconds: 10
+      periodSeconds: 30
