@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "helloweb.fullname" . }}
+  labels:
+    app: {{ .Release.Name  }}-helloweb
+    sys: {{ include "helloweb.name" . }}
+    chart: {{ include "helloweb.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ .Release.Name }}-helloweb

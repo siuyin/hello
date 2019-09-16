@@ -1,0 +1,1 @@
+hello web example application for kubernetes.

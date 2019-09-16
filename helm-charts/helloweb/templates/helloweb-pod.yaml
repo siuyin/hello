@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Release.Name }}-helloweb
+  labels:
+    app: {{ .Release.Name }}-helloweb
+    sys: {{ include "helloweb.name" . }}
+spec:
+  containers:
+  - name: helloweb
+    image: {{ .Values.image}}
+    env:
+    - name: NATS_URL
+      value: {{ .Release.Name }}-nats-streaming
+    - name: SUBJECT
+      value: {{ .Values.Subject }}
+    - name: NATS_STREAMING_CLUSTER_ID
+      value: helloweb
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 30
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 2
+      periodSeconds: 10

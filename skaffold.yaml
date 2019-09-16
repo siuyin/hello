@@ -1,0 +1,32 @@
+apiVersion: skaffold/v1beta11
+kind: Config
+build:
+  artifacts:
+  - image: siuyin/junk
+    context: .
+    docker: 
+      dockerfile: helloweb.dockerfile
+deploy:
+  helm:
+    releases:
+    - name: helloweb-dev
+      chartPath: helm-charts/helloweb
+      values:
+        image: siuyin/junk
+      valuesFiles:
+        - helm-charts/helloweb/values-dev.yaml
+      setValues:
+        stage: Test
+profiles:
+- name: prod
+  deploy:
+    helm:
+      releases:
+      - name: helloweb-prod
+        chartPath: helm-charts/helloweb
+        values:
+          image: siuyin/junk
+        valuesFiles:
+          - helm-charts/helloweb/values-prod.yaml
+        setValues:
+          stage: Live
