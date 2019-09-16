@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/nats-io/stan.go"
@@ -38,8 +40,21 @@ func main() {
 	h.conn.Subscribe(h.subj, func(m *stan.Msg) {
 		fmt.Printf("seq: %v, data: %s\n", m.Sequence, m.Data)
 	}, stan.DurableName("junk"))
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	stop := false
+	go func() {
+		for _ = range c {
+			stop = true
+		}
+	}()
 	for {
 		h.publish(time.Now().Format("15:04:05.000"))
 		time.Sleep(time.Second)
+		if stop {
+			h.conn.Close()
+			fmt.Println("exiting")
+			break
+		}
 	}
 }
