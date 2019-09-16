@@ -20,3 +20,11 @@ docker build --tag siuyin/junk --file helloworld.dockerfile .
 docker build -t siuyin/junk -f helloworld.dockerfile .
 docker build -t siuyin/junk -f goodbyeworld.dockerfile .
 ```
+
+## Deloy to kubernetes with skaffold
+
+```sh
+export KUBECONFIG=/path/to/kube/config
+skaffold run               # deploys dev release
+skaffold run -p prod       # deploys prod release
+```
