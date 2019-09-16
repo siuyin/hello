@@ -18,13 +18,13 @@ spec:
       value: helloweb
     livenessProbe:
       httpGet:
-        path: /
+        path: /liveness
         port: 8080
       initialDelaySeconds: 30
       periodSeconds: 30
     readinessProbe:
       httpGet:
-        path: /
+        path: /readiness
         port: 8080
       initialDelaySeconds: 2
       periodSeconds: 10
