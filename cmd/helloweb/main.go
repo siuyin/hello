@@ -29,7 +29,7 @@ func main() {
 	oce, err := ocagent.NewExporter(
 		ocagent.WithInsecure(),
 		ocagent.WithReconnectionPeriod(5*time.Second),
-		ocagent.WithAddress(ocAgentAddress), // Only included here for demo purposes.
+		ocagent.WithAddress(ocAgentAddress),
 		ocagent.WithServiceName("helloweb"))
 	if err != nil {
 		log.Fatalf("Failed to create ocagent-exporter: %v", err)
