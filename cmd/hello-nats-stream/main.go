@@ -32,8 +32,9 @@ func (h *hub) publish(msg string) error {
 
 func main() {
 	fmt.Println("nats streaming example")
-	h := hub{subj: "junk",
-		addr: dflt.EnvString("NATS_URL", "nats://192.168.1.68:4222")}
+	addr := dflt.EnvString("NATS_URL", "nats://192.168.1.68:4222")
+	fmt.Printf("connecting to NATS server at %s\n", addr)
+	h := hub{subj: "junk", addr: addr}
 	if err := h.connect(dflt.EnvString("CLUSTER_ID", "test-cluster"), "junk-client"); err != nil {
 		log.Fatal(err)
 	}

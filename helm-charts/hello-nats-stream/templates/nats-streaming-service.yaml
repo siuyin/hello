@@ -1,0 +1,18 @@
+piVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-nats-streaming
+  labels:
+    app: {{ .Release.Name }}-nats-streaming
+    sys: {{ include "hello-nats-stream.name" . }}
+    chart: {{ include "hello-nats-stream.chart" . }}
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.NATSservice.type }}
+  ports:
+    - port: 4222
+      targetPort: 4222
+      protocol: TCP
+      name: nats
+  selector:
+    app: {{ .Release.Name }}-nats-streaming

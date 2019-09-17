@@ -1,0 +1,32 @@
+apiVersion: skaffold/v1beta11
+kind: Config
+build:
+  artifacts:
+  - image: siuyin/junk
+    context: .
+    docker: 
+      dockerfile: hello-nats-stream.dockerfile
+deploy:
+  helm:
+    releases:
+    - name: hello-nats-stream-dev
+      chartPath: helm-charts/hello-nats-stream
+      values:
+        image: siuyin/junk
+      valuesFiles:
+        - helm-charts/hello-nats-stream/values-dev.yaml
+      setValues:
+        stage: Test
+profiles:
+- name: prod
+  deploy:
+    helm:
+      releases:
+      - name: hello-nats-stream-prod
+        chartPath: helm-charts/hello-nats-stream
+        values:
+          image: siuyin/junk
+        valuesFiles:
+          - helm-charts/hello-nats-stream/values-prod.yaml
+        setValues:
+          stage: Live

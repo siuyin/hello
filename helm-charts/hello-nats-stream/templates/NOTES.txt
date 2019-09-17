@@ -1,0 +1,4 @@
+hello nats streaming application.
+Deploys:
+1. hello-nats-streaming application
+1. dedicated nats-streaming server

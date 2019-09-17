@@ -28,3 +28,10 @@ export KUBECONFIG=/path/to/kube/config
 skaffold run               # deploys dev release
 skaffold run -p prod       # deploys prod release
 ```
+
+## Example of two pod deployment to kuberenets
+```sh
+export KUBECONFIG=/path/to/kube/config
+skaffold run -f hello-nats-stream.skaffold.yaml
+skaffold run -f hello-nats-stream.skaffold.yaml -p prod
+```

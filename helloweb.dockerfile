@@ -10,3 +10,5 @@ COPY --from=builder /app/bin/helloweb /app
 EXPOSE 8080
 ENV SUBJECT="World in Docker"
 CMD ["/app"]
+
+# vim: set filetype=dockerfile :

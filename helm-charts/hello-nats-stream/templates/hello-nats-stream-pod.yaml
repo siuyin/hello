@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Release.Name }}-hello-nats-stream
+  labels:
+    app: {{ .Release.Name }}-hello-nats-stream
+    sys: {{ include "hello-nats-stream.name" . }}
+spec:
+  containers:
+  - name: hello-nats-stream
+    image: {{ .Values.image }}
+    env:
+    - name: NATS_URL
+      value: {{ .Release.Name }}-nats-streaming
+    - name: NATS_STREAMING_CLUSTER_ID
+      value: {{ .Values.ClusterID }}

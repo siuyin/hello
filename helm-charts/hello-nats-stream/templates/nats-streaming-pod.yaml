@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Release.Name }}-nats-streaming
+  labels:
+    app: {{ .Release.Name }}-nats-streaming
+    sys: {{ include "hello-nats-stream.name" . }}
+    chart: {{ include "hello-nats-stream.chart" . }}
+    release: {{ .Release.Name }}
+spec:
+  containers:
+  - name: nats-streaming
+    image: {{ .Values.NATSStreamingImage }}
+    args: ['-cid=test-cluster','--max_bytes=1GB','--store=FILE','--dir=/data','--file_sync=false']
+    volumeMounts:
+    - mountPath: /data
+      name: data-volume
+  volumes:
+  - name: data-volume
+    hostPath:
+      # directory location on host - it must be created manually prior to deploying this chart
+      path: "/data/{{ .Release.Name }}/nats-streaming"
+
