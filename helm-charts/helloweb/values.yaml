@@ -30,3 +30,9 @@ tolerations: []
 affinity: {}
 
 OCAgentAddress: "192.168.1.68:55678"
+OCImage: omnition/opencensus-collector:0.1.4-11
+OCService:
+  type: ClusterIP
+  CollectorPort: 55678
+  zPagesPort: 55679
+

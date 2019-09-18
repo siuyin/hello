@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name  }}-opencensus
+  labels:
+    app: {{ .Release.Name  }}-opencensus
+    sys: {{ include "helloweb.name" . }}
+    chart: {{ include "helloweb.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.OCService.type }}
+  ports:
+    - port: {{ .Values.OCService.CollectorPort }}
+      targetPort: 55678
+      protocol: TCP
+      name: collector-port
+    - port: {{ .Values.OCService.zPagesPort }}
+      targetPort: 55679
+      protocol: TCP
+      name: z-pages-port
+  selector:
+    app: {{ .Release.Name }}-opencensus

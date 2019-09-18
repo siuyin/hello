@@ -17,7 +17,8 @@ spec:
     - name: NATS_STREAMING_CLUSTER_ID
       value: helloweb
     - name: OC_AGENT_ADDRESS
-      value: {{ .Values.OCAgentAddress }}
+      #value: {{ .Values.OCAgentAddress }}
+      value: {{ .Release.Name }}-opencensus:55678
     livenessProbe:
       httpGet:
         path: /liveness
