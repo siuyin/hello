@@ -8,6 +8,7 @@ go test ./...
 
 ## Building binaries
 
+The folowing only works with go 1.13 onward.
 ```sh
 mkdir bin
 go build -o bin ./...
