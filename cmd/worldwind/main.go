@@ -23,5 +23,6 @@ func main() {
 	// start serving
 	certPath := dflt.EnvString("CERT_PATH", "/h/certbot/rasp.beyondbroadcast.com/fullchain.pem")
 	keyPath := dflt.EnvString("KEY_PATH", "/h/certbot/rasp.beyondbroadcast.com/privkey.pem")
-	log.Fatal(http.ListenAndServeTLS(":8080", certPath, keyPath, nil))
+	port := dflt.EnvString("PORT", ":8080")
+	log.Fatal(http.ListenAndServeTLS(port, certPath, keyPath, nil))
 }
