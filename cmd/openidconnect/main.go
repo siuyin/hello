@@ -31,10 +31,10 @@ func main() {
 	state := "state should be returned unmodified" // Don't do this in production.
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, providerURI)
-	verifier := provider.Verifier(&oidc.Config{ClientID: clientID})
 	if err != nil {
 		log.Fatalf("provider: %v", err)
 	}
+	verifier := provider.Verifier(&oidc.Config{ClientID: clientID})
 	var claims struct {
 		ScopesSupported []string `json:"scopes_supported"`
 		ClaimsSupported []string `json:"claims_supported"`
