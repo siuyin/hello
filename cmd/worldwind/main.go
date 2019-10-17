@@ -5,6 +5,8 @@ import (
 	"html"
 	"log"
 	"net/http"
+
+	"github.com/siuyin/dflt"
 )
 
 func main() {
@@ -19,6 +21,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
 	// start serving
-	log.Fatal(http.ListenAndServeTLS(":8080", "/h/certbot/rasp.beyondbroadcast.com/fullchain.pem",
-		"/h/certbot/rasp.beyondbroadcast.com/privkey.pem", nil))
+	certPath := dflt.EnvString("CERT_PATH", "/h/certbot/rasp.beyondbroadcast.com/fullchain.pem")
+	keyPath := dflt.EnvString("KEY_PATH", "/h/certbot/rasp.beyondbroadcast.com/privkey.pem")
+	log.Fatal(http.ListenAndServeTLS(":8080", certPath, keyPath, nil))
 }
