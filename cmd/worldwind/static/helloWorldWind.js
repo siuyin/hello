@@ -87,7 +87,10 @@ var handlePick = function(o) {
   // Report the top picked object, if any.
   var topPickedObject = pickList.topPickedObject();
   if (topPickedObject && topPickedObject.isTerrain) {
-    pickResult.textContent = topPickedObject.position;
+    //pickResult.textContent = topPickedObject.position;
+    o = topPickedObject.position;
+    pickResult.textContent = "Latitude: "+o.latitude+", Longitude: "+o.longitude+", Altitude: "+o.altitude +" m";
+
   } else if (topPickedObject) {
     pickResult.textContent = topPickedObject.userObject.displayName;
   } else {
