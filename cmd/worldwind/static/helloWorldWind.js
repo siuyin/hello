@@ -49,6 +49,8 @@ var polygon = new WorldWind.Polygon(boundaries, polygonAttributes);
 polygon.extrude = true;
 polygonLayer.addRenderable(polygon);
 
+wwd.goTo(new WorldWind.Position(1.34,103.8,10000000.0)); // Singapore at 10,000 km altitude.
+
 // Add WMS imagery
 var serviceAddress = "https://neo.sci.gsfc.nasa.gov/wms/wms?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0";
 //var layerName = "MOD_LSTD_CLIM_M";
