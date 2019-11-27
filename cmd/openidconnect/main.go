@@ -13,10 +13,16 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	ibmProvider     = "https://siuyin.ice.ibmcloud.com/oidc/endpoint/default"
+	ibmClientID     = "de1603d7-7473-4217-8efd-2f5314573ca7"
+	ibmClientSecret = "OmlelKVSBu"
+)
+
 var (
-	providerURI  = dflt.EnvString("IDP_URL", "https://siuyin.ice.ibmcloud.com/oidc/endpoint/default")
-	clientID     = dflt.EnvString("CLIENT_ID", "de1603d7-7473-4217-8efd-2f5314573ca7")
-	clientSecret = dflt.EnvString("CLIENT_SECRET", "OmlelKVSBu")
+	providerURI  = dflt.EnvString("IDP_URL", ibmProvider)
+	clientID     = dflt.EnvString("CLIENT_ID", ibmClientID)
+	clientSecret = dflt.EnvString("CLIENT_SECRET", ibmClientSecret)
 )
 
 func main() {
@@ -27,7 +33,7 @@ func main() {
 		fmt.Fprintf(w, "Hello, path is: %q\n", html.EscapeString(r.URL.Path))
 	})
 
-	// login handler
+	// OIDC setup
 	state := "state should be returned unmodified" // Don't do this in production.
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, providerURI)
@@ -52,6 +58,8 @@ func main() {
 		RedirectURL:  "https://rasp.beyondbroadcast.com/auth/oidc/callback",
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
+
+	// login handler
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Redirecting to ID provider: %s\n", providerURI)
 		http.Redirect(w, r, config.AuthCodeURL(state,
@@ -108,7 +116,7 @@ func main() {
 			http.Error(w, "Failed to get userinfo: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Printf("userInfo: %s\n", userInfo)
+		fmt.Printf("userInfo: %v\n", userInfo)
 
 		resp := struct {
 			OAuth2Token *oauth2.Token
@@ -127,6 +135,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
 	// start serving
+	log.Println("Starting http server.")
 	log.Fatal(http.ListenAndServeTLS(":8080", "/h/certbot/rasp.beyondbroadcast.com/fullchain.pem",
 		"/h/certbot/rasp.beyondbroadcast.com/privkey.pem", nil))
 }
