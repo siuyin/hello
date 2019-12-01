@@ -15,4 +15,7 @@ spec:
       containers:
       - name: ticktock
         image: siuyin/junk
+        env:
+        - name: STAGE
+          value: dev
 

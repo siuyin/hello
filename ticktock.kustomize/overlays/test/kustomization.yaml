@@ -1,3 +1,5 @@
 nameSuffix: -test
 resources:
 - ../../base
+patches:
+- env.yaml
