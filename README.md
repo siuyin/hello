@@ -29,6 +29,7 @@ export KUBECONFIG=/path/to/kube/config
 skaffold run               # deploys dev release
 skaffold run -p prod       # deploys prod release
 ```
+This currently deploys helloweb with opencensus monitoring.
 
 ## Example of two pod deployment to kuberenetes
 ```sh
