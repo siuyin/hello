@@ -37,3 +37,10 @@ export KUBECONFIG=/path/to/kube/config
 skaffold run -f hello-nats-stream.skaffold.yaml
 skaffold run -f hello-nats-stream.skaffold.yaml -p prod
 ```
+
+## Example with kustomize and ticktock binary
+```sh
+export KUBECONFIG=/path/to/kube/config
+skaffold run -f ticktock.skaffold.yaml
+```
+

@@ -1,0 +1,4 @@
+commonLabels:
+  sys: ticktock
+resources:
+- deployment.yaml
