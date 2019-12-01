@@ -1,0 +1,6 @@
+commonLabels:
+  sys: bbox # for busybox
+resources:
+- deployment.yaml
+- service.yaml
+

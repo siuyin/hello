@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bbox
+  labels:
+    sys: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      sys: busybox
+  template:
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: bbox
+        image: busybox:1.27
+        command: ["sleep"]
+        args: ["1000000000"]
+
