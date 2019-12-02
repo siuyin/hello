@@ -41,6 +41,9 @@ skaffold run -f hello-nats-stream.skaffold.yaml -p prod
 ## Example with kustomize and ticktock binary
 ```sh
 export KUBECONFIG=/path/to/kube/config
-skaffold run -f ticktock.skaffold.yaml
+skaffold run -f ticktock.skaffold.yaml # deploys base kustomization
+skaffold run -f ticktock.skaffold.yaml -p prod # deploys overlay/prod kustomization
+skaffold run -f ticktock.skaffold.yaml -p test # deploys overlay/test kustomization
+
 ```
 

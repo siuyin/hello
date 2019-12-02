@@ -18,4 +18,6 @@ spec:
         env:
         - name: STAGE
           value: dev
+        - name: MSG
+          value: D-message
 
