@@ -2,3 +2,5 @@ commonLabels:
   sys: ticktock
 resources:
 - deployment.yaml
+- deployment-nats-streaming.yaml
+- nats-streaming-svc.yaml

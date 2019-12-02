@@ -3,3 +3,4 @@ resources:
 - ../../base
 patches:
 - env.yaml
+- nats-storage-path.yaml

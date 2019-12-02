@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats-streaming
+  labels:
+    sys: ticktock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      sys: ticktock
+  template:
+    spec:
+      containers:
+      - name: nats-streaming
+        image: nats-streaming:0.16.2
+        args: ['-cid=test-cluster','--max_bytes=1GB','--store=FILE','--dir=/data','--file_sync=false']
+        volumeMounts:
+        - mountPath: /data
+          name: data-volume
+      volumes:
+      - name: data-volume
+        hostPath:
+          # directory location on host - it must be created manually prior to deploying this chart
+          path: "/data/ticktock-dev/nats-streaming"

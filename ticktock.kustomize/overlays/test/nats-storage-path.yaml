@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats-streaming
+spec:
+  template:
+    spec:
+      volumes:
+      - name: data-volume
+        hostPath:
+          path: /data/ticktock-test/nats-streaming
