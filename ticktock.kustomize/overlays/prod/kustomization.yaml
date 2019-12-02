@@ -4,7 +4,7 @@ configMapGenerator:
   behavior: merge
   literals:
   - STAGE=prod
-  - MSG=CM-prod
+  - MSG="production message"
 resources:
 - ../../base
 patches:

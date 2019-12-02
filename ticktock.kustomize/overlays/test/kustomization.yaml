@@ -4,7 +4,7 @@ configMapGenerator:
   behavior: merge
   literals:
   - STAGE=test
-  - MSG=CM-test
+  - MSG=test-message
 resources:
 - ../../base
 patches:
