@@ -1,6 +1,11 @@
 nameSuffix: -test
+configMapGenerator:
+- name: ticktock
+  behavior: merge
+  literals:
+  - STAGE=test
+  - MSG=CM-test
 resources:
 - ../../base
 patches:
-- env.yaml
 - nats-storage-path.yaml

@@ -15,9 +15,6 @@ spec:
       containers:
       - name: ticktock
         image: siuyin/junk
-        env:
-        - name: STAGE
-          value: dev
-        - name: MSG
-          value: D-message
-
+        envFrom:
+        - configMapRef:
+            name: ticktock

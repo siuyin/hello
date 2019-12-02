@@ -1,5 +1,10 @@
 commonLabels:
   sys: ticktock
+configMapGenerator:
+- name: ticktock
+  literals:
+  - STAGE=dev
+  - MSG=CM-Message
 resources:
 - deployment.yaml
 - deployment-nats-streaming.yaml

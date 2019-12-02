@@ -1,6 +1,11 @@
 nameSuffix: -prod
+configMapGenerator:
+- name: ticktock
+  behavior: merge
+  literals:
+  - STAGE=prod
+  - MSG=CM-prod
 resources:
 - ../../base
 patches:
-- env.yaml
 - nats-storage-path.yaml
