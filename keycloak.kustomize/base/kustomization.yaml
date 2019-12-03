@@ -1,0 +1,15 @@
+# kustomization for keycloak authentication server
+namePrefix: kcl-
+commonLabels:
+  sys: keycloak
+secretGenerator:
+- name: postgres
+  envs:
+  - postgres.secret
+configMapGenerator:
+- name: keycloak
+  literals:
+  - STAGE=dev
+resources:
+#- keycloak-deployment.yaml
+- postgres-deployment.yaml
