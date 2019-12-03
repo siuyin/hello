@@ -1,3 +1,4 @@
+namePrefix: tck-
 commonLabels:
   sys: ticktock
 configMapGenerator:
