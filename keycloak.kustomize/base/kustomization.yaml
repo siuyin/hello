@@ -1,5 +1,6 @@
 # kustomization for keycloak authentication server
 namePrefix: kcl-
+nameSuffix: -dev
 commonLabels:
   sys: keycloak
 secretGenerator:
