@@ -78,6 +78,8 @@ spec:
               key: postgres.password
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
+        - name: POSTGRES_DB
+          value: keycloak
 ---
 # postgres service
 apiVersion: v1

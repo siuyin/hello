@@ -6,10 +6,13 @@ secretGenerator:
 - name: postgres
   envs:
   - postgres.secret
+- name: keycloak
+  envs:
+  - keycloak.secret
 configMapGenerator:
-- name: postgres
+- name: keycloak
   literals:
-  - POSTGRES_DB=keycloak
+  - DB_ADDR=kcl-postgres-dev:5432 # kustomize me
 resources:
-#- keycloak-deployment.yaml
+- keycloak-deployment.yaml
 - postgres-deployment.yaml
