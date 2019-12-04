@@ -1,4 +1,9 @@
 nameSuffix: -prod
+configMapGenerator:
+- name: keycloak
+  behavior: merge
+  literals:
+  - DB_ADDR=kcl-postgres-prod:5432 # kustomize me
 resources:
 - ../../base
 patches:
