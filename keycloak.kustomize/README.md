@@ -13,3 +13,9 @@ Subtitute prod for dev to deploy a dev server.
 This causes a conflict as the docker images have
 built-in clustering and clustering has not (yet)
 been properly configured.
+
+## Showing resources
+
+```sh
+kubectl get cm,secret,pvc,po,deploy,svc -l sys=keycloak
+```
