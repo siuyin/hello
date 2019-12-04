@@ -7,9 +7,9 @@ secretGenerator:
   envs:
   - postgres.secret
 configMapGenerator:
-- name: keycloak
+- name: postgres
   literals:
-  - STAGE=dev
+  - POSTGRES_DB=keycloak
 resources:
 #- keycloak-deployment.yaml
 - postgres-deployment.yaml

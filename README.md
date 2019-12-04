@@ -46,4 +46,13 @@ skaffold run -f ticktock.skaffold.yaml -p prod # deploys overlay/prod kustomizat
 skaffold run -f ticktock.skaffold.yaml -p test # deploys overlay/test kustomization
 
 ```
+## keycloak.kustomize
+keycloak.kustomize holds kustomization scripts for
+my attempt at a production ready keycloak installation.
 
+To install / delete:
+```sh
+kustomize build keycloak.kustomize/base | kubectl apply -f -
+
+kustomize build keycloak.kustomize/base | kubectl delete -f -
+```

@@ -1,4 +1,47 @@
 # postgres-deployment.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  capacity:
+    storage: 8Gi
+  # volumeMode field requires BlockVolume Alpha feature gate to be enabled.
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /data/kcl-postgres-dev # customize me
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - samsung # customize me
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgdata
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: local-storage
+  selector:
+    matchLabels:
+      app: postgres
+      sys: keycloak # customize me
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,15 +60,24 @@ spec:
       labels:
         app: postgres
     spec:
+      volumes:
+      - name: pgdata
+        persistentVolumeClaim:
+          claimName: pgdata
       containers:
       - name: postgres
         image: postgres:12-alpine
+        volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data/pgdata
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: postgres
               key: postgres.password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
 ---
 # postgres service
 apiVersion: v1
