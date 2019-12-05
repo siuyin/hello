@@ -10,9 +10,9 @@
           onLoad: 'check-sso'
         }).then(function(authenticated) {
            if (authenticated) {
-             alert('authenticated');
+             //alert('authenticated');
            } else {
-             keycloak.login('/');
+             keycloak.login();
            }
         }).catch(function() {
             alert('failed to initialize');
@@ -20,6 +20,7 @@
     </script>
 </head>
 <body>
+<div id="logout"><button onClick="keycloak.logout()">log out</button></div>
 This is secured content.
 </body>
 </html>
