@@ -52,7 +52,20 @@ my attempt at a production ready keycloak installation.
 
 To install / delete:
 ```sh
-kustomize build keycloak.kustomize/base | kubectl apply -f -
+export KUBECONFIG=/path/to/kube/config
+kustomize build keycloak.kustomize/overlays/prod | kubectl apply -f -
 
-kustomize build keycloak.kustomize/base | kubectl delete -f -
+kustomize build keycloak.kustomize/overlays/prod | kubectl delete -f -
 ```
+
+## keycloak sercure web app
+Deploy keycloak server as shown above.
+Get the service address:
+```sh
+export KUBECONFIG=/path/to/kube/config
+kubectl get svc -l sys=keycloak
+
+skaffold run -f secureweb.skaffold.yaml -p dev
+```
+```
+

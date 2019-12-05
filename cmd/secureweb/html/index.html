@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <title>secureweb</title>
+    <script src="http://192.168.93.15:32674/auth/js/keycloak.js"></script>
+    <script>
+        var keycloak = new Keycloak();
+        keycloak.init({
+          promiseType: 'native',
+          onLoad: 'check-sso'
+        }).then(function(authenticated) {
+           if (authenticated) {
+             alert('authenticated');
+           } else {
+             keycloak.login('/');
+           }
+        }).catch(function() {
+            alert('failed to initialize');
+        });
+    </script>
+</head>
+<body>
+This is secured content.
+</body>
+</html>
+

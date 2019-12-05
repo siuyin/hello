@@ -1,0 +1,10 @@
+namePrefix: scw-
+commonLabels:
+  sys: secureweb
+configMapGenerator:
+- name: secureweb
+  literals:
+  - STAGE=dev
+  - MSG=CM-Message
+resources:
+  - secureweb-deployment.yaml

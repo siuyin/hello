@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secureweb
+  labels:
+    sys: secureweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      sys: secureweb
+  template:
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: secureweb
+        image: siuyin/junk
+        envFrom:
+        - configMapRef:
+            name: secureweb
