@@ -4,7 +4,7 @@ build:
   artifacts:
   - image: siuyin/junk
     context: .
-    docker: 
+    docker:
       dockerfile: hello-nats-stream.dockerfile
 deploy:
   helm:
@@ -14,7 +14,7 @@ deploy:
       values:
         image: siuyin/junk
       valuesFiles:
-        - helm-charts/hello-nats-stream/values-dev.yaml
+      - helm-charts/hello-nats-stream/values-dev.yaml
       setValues:
         stage: Test
 profiles:
@@ -27,6 +27,6 @@ profiles:
         values:
           image: siuyin/junk
         valuesFiles:
-          - helm-charts/hello-nats-stream/values-prod.yaml
+        - helm-charts/hello-nats-stream/values-prod.yaml
         setValues:
           stage: Live
