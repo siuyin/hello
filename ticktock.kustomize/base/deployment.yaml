@@ -2,14 +2,15 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ticktock
-  labels:
-    sys: ticktock
 spec:
   replicas: 1
   selector:
     matchLabels:
-      sys: ticktock
+      app: ticktock
   template:
+    metadata:
+      labels:
+        app: ticktock
     spec:
       terminationGracePeriodSeconds: 5
       containers:

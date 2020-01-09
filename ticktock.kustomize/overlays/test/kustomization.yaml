@@ -1,4 +1,6 @@
 nameSuffix: -test
+commonLabels:
+  stage: test
 configMapGenerator:
 - name: ticktock
   behavior: merge
