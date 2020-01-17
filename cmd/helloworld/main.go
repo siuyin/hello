@@ -8,5 +8,7 @@ import (
 
 func main() {
 	fmt.Println(world.Greet(), "world!")
+	var n int
+	fmt.Println(n)
 	fmt.Println(world.GoodBye(), "world!")
 }
