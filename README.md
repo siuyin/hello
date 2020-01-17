@@ -1,5 +1,7 @@
 # Hello world examples and code templates
 
+NOTE: Main example for skaffold/kustomize is ticktock.
+
 ## Testing
 
 ```

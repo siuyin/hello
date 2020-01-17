@@ -1,6 +1,7 @@
 namePrefix: tck-
 commonLabels:
   sys: ticktock
+  stage: dev
 configMapGenerator:
 - name: ticktock
   literals:

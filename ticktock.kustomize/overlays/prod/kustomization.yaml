@@ -1,4 +1,6 @@
 nameSuffix: -prod
+commonLabels:
+  stage: prod
 configMapGenerator:
 - name: ticktock
   behavior: merge
