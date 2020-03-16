@@ -6,7 +6,10 @@ import (
 
 type stateFn func(*int) stateFn
 
-// sStart is the state start.
+// sStart is the start state.
+// i can be thought as the environment surrounding the state machine.
+// In this example, i is used for terminating the state machine.
+// State machines in embedded electronics typically do not terminate.
 func sStart(i *int) stateFn {
 	fmt.Println("start")
 	return sOpen(i)
@@ -23,12 +26,14 @@ func sClose(i *int) stateFn {
 	fmt.Printf("close %d\n", *i)
 	return sOpen(i)
 }
+func runStateMachine(i *int) {
+	for sf := sStart(i); sf != nil; sf = sf(i) {
+	}
+}
 
 func main() {
-	fmt.Println("Hello, playground")
+	fmt.Println("State machine demo\n")
 	i := 0
-	for sf := sStart(&i); sf != nil; sf = sf(&i) {
-		//time.Sleep(time.Second)
-
-	}
+	runStateMachine(&i)
+	fmt.Println("\nDemo completed")
 }
