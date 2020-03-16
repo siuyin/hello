@@ -32,7 +32,7 @@ func runStateMachine(i *int) {
 }
 
 func main() {
-	fmt.Println("State machine demo\n")
+	fmt.Printf("State machine demo\n\n")
 	i := 0
 	runStateMachine(&i)
 	fmt.Println("\nDemo completed")
