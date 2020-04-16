@@ -20,7 +20,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestSub(t *testing.T) {
-	if 3-1 != 2 {
+	if sub(3, 1) != 2 {
 		t.Error("failed test")
 	}
 }
