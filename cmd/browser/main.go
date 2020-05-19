@@ -76,7 +76,7 @@ body { font-size: 1em; font-family: Arial, Helvetica, sans-serif; }
 <h1>Listing</h1>
 {{range .}}
   <div class="entry">
-    <img src="{{.Thumbnail}}" height="150px"/><br>
+    <a href="{{.Thumbnail}}"><img src="{{.Thumbnail}}" height="150px"/></a><br>
     {{.Link}}<br>
     {{range .Attr}} {{.}} {{end}}
   </div>
