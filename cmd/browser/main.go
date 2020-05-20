@@ -25,6 +25,7 @@ func main() {
 	recs := parseData(cr)
 	writeHTML(recs)
 }
+
 func checkUsage() bool {
 	if len(os.Args) != 3 {
 		fmt.Printf(`Usage: browser <data.csv> <output.html>
@@ -36,6 +37,7 @@ eg.
 	}
 	return true
 }
+
 func openInputFile() (*csv.Reader, *os.File) {
 	f, err := os.Open(os.Args[1])
 	if err != nil {
@@ -43,6 +45,7 @@ func openInputFile() (*csv.Reader, *os.File) {
 	}
 	return csv.NewReader(f), f
 }
+
 func parseData(cr *csv.Reader) []rec {
 	rs, err := cr.ReadAll()
 	if err != nil {
@@ -56,11 +59,13 @@ func parseData(cr *csv.Reader) []rec {
 	}
 	return op
 }
+
 func writeHTML(recs []rec) {
 	w, err := os.Create(os.Args[2])
 	if err != nil {
 		log.Fatalf("writeHTML: %v", err)
 	}
+	defer w.Close()
 
 	tpl := `<!DOCTYPE html>
 <html>
