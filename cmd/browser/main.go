@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"html/template"
 	"log"
 	"os"
-	"text/template"
 )
 
 type rec struct {
@@ -61,21 +61,22 @@ func writeHTML(recs []rec) {
 	if err != nil {
 		log.Fatalf("writeHTML: %v", err)
 	}
-	t := template.Must(template.New("output").Parse(`
-<!DOCTYPE html>
+
+	tpl := `<!DOCTYPE html>
 <html>
 <head>
 <title>Browse</title>
 <style>
-body { font-size: 1em; font-family: Arial, Helvetica, sans-serif; }
-.entry {margin-left: 0.5em; margin-bottom: 2em; }
+  body { font-size: 1em; font-family: Arial, Helvetica, sans-serif; }
+  .entry {margin-left: 0.5em; margin-bottom: 2em; }
 </style>
 </head>
 
 <body>
 <h1>Listing</h1>
-{{range .}}
+{{range $index, $element := .}}
   <div class="entry">
+    {{$index}}.
     <a href="{{.Thumbnail}}"><img src="{{.Thumbnail}}" height="150px"/></a><br>
     {{.Link}}<br>
     {{range .Attr}} {{.}} {{end}}
@@ -86,6 +87,8 @@ body { font-size: 1em; font-family: Arial, Helvetica, sans-serif; }
 </body>
 
 </html>
-`))
+`
+	t := template.Must(template.New("output").Parse(tpl))
 	t.Execute(w, recs)
+	fmt.Printf("Output written to %s.\n\n", os.Args[2])
 }
