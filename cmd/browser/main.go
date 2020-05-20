@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"strings"
 )
 
 type rec struct {
@@ -23,7 +24,7 @@ func main() {
 	defer f.Close()
 
 	recs := parseData(cr)
-	writeHTML(recs)
+	writeHTML(recs, filter, "fav")
 }
 
 func checkUsage() bool {
@@ -54,13 +55,24 @@ func parseData(cr *csv.Reader) []rec {
 	op := []rec{}
 	for _, r := range rs[1:] { // skip header
 		rec := rec{Link: r[0], Thumbnail: r[1]}
-		rec.Attr = append(rec.Attr, r[2:]...)
+		rec.Attr = attrs(r)
 		op = append(op, rec)
 	}
 	return op
 }
+func attrs(r []string) []string {
+	op := []string{}
+	for _, e := range r[2:] {
+		if len(e) == 0 {
+			continue
+		}
+		op = append(op, e)
+	}
+	return op
+}
 
-func writeHTML(recs []rec) {
+func writeHTML(recs []rec, filter func([]rec, string) []rec, s string) {
+	recs = filter(recs, s)
 	w, err := os.Create(os.Args[2])
 	if err != nil {
 		log.Fatalf("writeHTML: %v", err)
@@ -74,6 +86,7 @@ func writeHTML(recs []rec) {
 <style>
   body { font-size: 1em; font-family: Arial, Helvetica, sans-serif; }
   .entry {margin-left: 0.5em; margin-bottom: 2em; }
+  .attr { background-color: LightBlue; margin:0.1em; padding:0.2em; border-radius: 10px; }
 </style>
 </head>
 
@@ -84,7 +97,7 @@ func writeHTML(recs []rec) {
     {{$index}}.
     <a href="{{.Thumbnail}}"><img src="{{.Thumbnail}}" height="150px"/></a><br>
     {{.Link}}<br>
-    {{range .Attr}} {{.}} {{end}}
+    {{range .Attr -}}<span class="attr">{{.}}</span>{{- end -}}
   </div>
 {{end}}
 <table>
@@ -96,4 +109,16 @@ func writeHTML(recs []rec) {
 	t := template.Must(template.New("output").Parse(tpl))
 	t.Execute(w, recs)
 	fmt.Printf("Output written to %s.\n\n", os.Args[2])
+}
+func filter(recs []rec, s string) []rec {
+	op := []rec{}
+	for _, r := range recs {
+		for _, a := range r.Attr {
+			if strings.Contains(a, s) {
+				op = append(op, r)
+				continue
+			}
+		}
+	}
+	return op
 }
