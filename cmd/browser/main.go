@@ -4,11 +4,24 @@ import (
 	"encoding/csv"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
+type cfg struct {
+	InputFile string `yaml:"InputFile"`
+	OutputDir string `yaml:"OutputDir"`
+	Pages     []page `yaml:"Pages"`
+}
+type page struct {
+	Name     string `yaml:"Name"`
+	Filename string `yaml:"Filename"`
+}
 type rec struct {
 	Link      string
 	Thumbnail string
@@ -16,22 +29,19 @@ type rec struct {
 }
 
 func main() {
-	fmt.Println("media browser")
 	if !checkUsage() {
 		return
 	}
-	cr, f := openInputFile()
-	defer f.Close()
-
-	recs := parseData(cr)
-	writeHTML(recs)
+	cfg := readConfig(os.Args[1])
+	recs := readData(cfg)
+	createPages(cfg, recs)
 }
 
 func checkUsage() bool {
-	if len(os.Args) != 3 {
-		fmt.Printf(`Usage: browser <data.csv> <output.html>
+	if len(os.Args) != 2 {
+		fmt.Printf(`Usage: browser <config.yaml> 
 eg.
-  browser data.csv output.html
+  browser config.yaml
 
 `)
 		return false
@@ -39,14 +49,35 @@ eg.
 	return true
 }
 
-func openInputFile() (*csv.Reader, *os.File) {
-	f, err := os.Open(os.Args[1])
+func readConfig(path string) *cfg {
+	c := new(cfg)
+	f, err := os.Open(path)
 	if err != nil {
-		log.Fatalf("openInput: %v", err)
+		log.Fatalf("readConfig open: %s: %v", path, err)
 	}
-	return csv.NewReader(f), f
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		log.Fatalf("readConfig read: %s: %v", path, err)
+	}
+
+	if err := yaml.Unmarshal(b, c); err != nil {
+		log.Fatalf("readConfig %s: %v", path, err)
+	}
+	return c
 }
 
+func readData(c *cfg) []rec {
+	f, err := os.Open(c.InputFile)
+	if err != nil {
+		log.Fatalf("openInputFile: %s: %v", c.InputFile, err)
+	}
+	defer f.Close()
+
+	cr := csv.NewReader(f)
+	return parseData(cr)
+}
 func parseData(cr *csv.Reader) []rec {
 	rs, err := cr.ReadAll()
 	if err != nil {
@@ -71,23 +102,22 @@ func attrs(r []string) []string {
 	return op
 }
 
-func writeHTML(recs []rec) {
-	writePage(recs, filter, "fav")
-}
-func writePage(recs []rec, filter func([]rec, string) []rec, s string) {
-	recs = filter(recs, s)
-	w, err := os.Create(os.Args[2])
-	if err != nil {
-		log.Fatalf("writeHTML: %v", err)
+func createPages(c *cfg, recs []rec) {
+	if err := os.MkdirAll(c.OutputDir, 0700); err != nil {
+		log.Fatalf("createPages: %s: %v", c.OutputDir, err)
 	}
-	defer w.Close()
+	for _, p := range c.Pages {
+		createPage(c, recs, p)
+	}
+}
 
-	tpl := `<!DOCTYPE html>
+const master = `<!DOCTYPE html>
 <html>
 <head>
 <title>Browse</title>
 <style>
   body { font-size: 1em; font-family: Arial, Helvetica, sans-serif; }
+  nav { margin-bottom: 1em; }
   .entry {margin-left: 0.5em; margin-bottom: 2em; }
   .attr { background-color: LightBlue; margin:0.1em; padding:0.2em; border-radius: 10px; }
 </style>
@@ -95,7 +125,11 @@ func writePage(recs []rec, filter func([]rec, string) []rec, s string) {
 
 <body>
 <h1>Listing</h1>
-{{range $index, $element := .}}
+<nav>
+  {{range .Cfg.Pages}} {{if eq .Name $.CurrentPage.Name}} {{.Name}} {{else}} <a href="{{.Filename}}">{{.Name}}</a> {{end}}{{end}}
+</nav>
+
+{{range $index, $element := .Recs}}
   <div class="entry">
     {{$index}}.
     <a href="{{.Thumbnail}}"><img src="{{.Thumbnail}}" height="150px"/></a><br>
@@ -103,17 +137,30 @@ func writePage(recs []rec, filter func([]rec, string) []rec, s string) {
     {{range .Attr -}}<span class="attr">{{.}}</span>{{- end -}}
   </div>
 {{end}}
-<table>
-</table>
+
 </body>
 
 </html>
 `
-	t := template.Must(template.New("fav").Parse(tpl))
-	t.Execute(w, recs)
-	fmt.Printf("Output written to %s.\n\n", os.Args[2])
+
+func createPage(c *cfg, recs []rec, p page) {
+	f, err := os.Create(filepath.Join(c.OutputDir, p.Filename))
+	if err != nil {
+		log.Fatalf("createPage: %v: %v", p, err)
+	}
+	defer f.Close()
+
+	t := template.Must(template.New("master").Parse(master))
+	if err := t.Execute(f, struct {
+		Cfg         *cfg
+		Recs        []rec
+		CurrentPage page
+	}{c, filter(recs, p.Name, ""), p},
+	); err != nil {
+		log.Println(err)
+	}
 }
-func filter(recs []rec, s string) []rec {
+func filter(recs []rec, s string, ext string) []rec {
 	op := []rec{}
 	for _, r := range recs {
 		for _, a := range r.Attr {

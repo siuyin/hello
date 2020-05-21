@@ -1,5 +1,5 @@
 InputFile: /h/Downloads/data.csv
-OutputDir: /h/Downloads/bar
+OutputDir: bar
 Pages:
 - Name: fav
   Filename: index.html
