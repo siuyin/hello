@@ -7,9 +7,6 @@ import (
 
 func TestReadConfig(t *testing.T) {
 	cfg := readConfig("testdata/sample.yaml")
-	if v := len(cfg.Pages); v != 3 {
-		t.Errorf("unexpected value: %v", v)
-	}
 	if v := cfg.InputFile; v != "/h/Downloads/data.csv" {
 		t.Errorf("unexpected value: %v", v)
 	}

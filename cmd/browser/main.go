@@ -21,6 +21,8 @@ type cfg struct {
 type page struct {
 	Name     string `yaml:"Name"`
 	Filename string `yaml:"Filename"`
+	Filter   string `yaml:"Filter"`
+	Ext      string `yaml:"Ext"` // "" means all extensions
 }
 type rec struct {
 	Link      string
@@ -155,16 +157,42 @@ func createPage(c *cfg, recs []rec, p page) {
 		Cfg         *cfg
 		Recs        []rec
 		CurrentPage page
-	}{c, filter(recs, p.Name, ""), p},
+	}{c, filter(recs, p), p},
 	); err != nil {
 		log.Println(err)
 	}
 }
-func filter(recs []rec, s string, ext string) []rec {
+func filter(recs []rec, p page) []rec {
+	recs = mediaFilter(recs, p)
+	recs = attrFilter(recs, p)
+	return recs
+}
+func mediaFilter(recs []rec, p page) []rec {
 	op := []rec{}
+	if (p.Filter == "" || p.Filter == "ALL") && (p.Ext == "" || p.Ext == "ALL") {
+		return recs
+	}
+	for _, r := range recs {
+		if strings.ToLower(filepath.Ext(r.Link)) != p.Ext {
+			continue
+		}
+		op = append(op, r)
+	}
+	return op
+}
+func attrFilter(recs []rec, p page) []rec {
+	if (p.Filter == "" || p.Filter == "ALL") && p.Ext != "" {
+		return recs
+	}
+
+	op := []rec{}
+	cond := p.Name
+	if p.Ext != "" {
+		cond = p.Filter
+	}
 	for _, r := range recs {
 		for _, a := range r.Attr {
-			if strings.Contains(a, s) {
+			if strings.Contains(a, cond) {
 				op = append(op, r)
 				continue
 			}
