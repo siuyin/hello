@@ -24,7 +24,7 @@ func main() {
 	defer f.Close()
 
 	recs := parseData(cr)
-	writeHTML(recs, filter, "fav")
+	writeHTML(recs)
 }
 
 func checkUsage() bool {
@@ -71,7 +71,10 @@ func attrs(r []string) []string {
 	return op
 }
 
-func writeHTML(recs []rec, filter func([]rec, string) []rec, s string) {
+func writeHTML(recs []rec) {
+	writePage(recs, filter, "fav")
+}
+func writePage(recs []rec, filter func([]rec, string) []rec, s string) {
 	recs = filter(recs, s)
 	w, err := os.Create(os.Args[2])
 	if err != nil {
@@ -106,7 +109,7 @@ func writeHTML(recs []rec, filter func([]rec, string) []rec, s string) {
 
 </html>
 `
-	t := template.Must(template.New("output").Parse(tpl))
+	t := template.Must(template.New("fav").Parse(tpl))
 	t.Execute(w, recs)
 	fmt.Printf("Output written to %s.\n\n", os.Args[2])
 }
