@@ -1,0 +1,10 @@
+- Page:
+    Name: fav
+    Filename: index.html
+- Page:
+    Name: foo
+    Filename: foo.html
+- Page:
+    Name: bar
+    Filename: bar.html
+
