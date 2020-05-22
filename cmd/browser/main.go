@@ -47,7 +47,7 @@ func readConfig(path string) *brow.Cfg {
 
 func createPages(c *brow.Cfg, recs []brow.Rec) {
 	if err := os.MkdirAll(c.OutputDir, 0700); err != nil {
-		log.Fatalf("createPages: %s: %v", c.OutputDir, err)
+		panic(fmt.Sprintf("createPages: %s: %v", c.OutputDir, err))
 	}
 	for _, p := range c.Pages {
 		createPage(c, recs, p)
