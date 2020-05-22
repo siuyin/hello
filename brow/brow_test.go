@@ -29,14 +29,18 @@ func testCfg(t *testing.T) *Cfg {
 }
 
 func TestReadData(t *testing.T) {
-	cfg := testCfg(t)
-	recs := ReadData(cfg)
+	recs := testData(t)
 	if len(recs) == 0 {
 		t.Errorf("records should be returned")
 	}
 	if v := recs[3].Link; v != "cat.avi" {
 		t.Errorf("unexpected value: %v", v)
 	}
+}
+func testData(t *testing.T) []Rec {
+	cfg := testCfg(t)
+	recs := ReadData(cfg)
+	return recs
 }
 
 func TestFilter(t *testing.T) {
@@ -50,5 +54,19 @@ func TestFilter(t *testing.T) {
 	orecs := Filter(recs, p)
 	if v := len(orecs); v != 1 {
 		t.Errorf("unexpected value: %v", v)
+	}
+}
+
+func TestImageRating(t *testing.T) {
+	exp := []Rating{
+		{"foo.jpg", "f3"},
+	}
+	recs := testData(t)
+	rat := ImageRating(recs)
+	if v := len(rat); v != len(exp) {
+		t.Errorf("unexpected value: %v", v)
+	}
+	if v := rat[0].Val; v != "f3" {
+		t.Errorf("unexpected value: %q", v)
 	}
 }

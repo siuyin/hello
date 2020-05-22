@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -125,4 +126,36 @@ func attrFilter(recs []Rec, p Page) []Rec {
 		}
 	}
 	return op
+}
+
+// Rating rates an image.
+type Rating struct {
+	Link string
+	Val  string
+}
+
+// ImageRating extracts image ratings from recs.
+func ImageRating(recs []Rec) []Rating {
+	rat := []Rating{}
+	page := Page{Ext: ".jpg", Filter: "ALL"}
+	recs = Filter(recs, page)
+	for _, r := range recs {
+		rtg := rating(r)
+		if rtg != "" {
+			rat = append(rat, Rating{Link: r.Link, Val: rtg})
+		}
+	}
+	return rat
+}
+func rating(rec Rec) string {
+	for _, a := range rec.Attr {
+		matched, err := regexp.MatchString(`f\d`, a)
+		if err != nil {
+			log.Printf("rating: %v: %v", rec, err)
+		}
+		if matched {
+			return a
+		}
+	}
+	return ""
 }
