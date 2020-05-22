@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/siuyin/hello/brow"
 )
@@ -49,9 +50,12 @@ func createPages(c *brow.Cfg, recs []brow.Rec) {
 	if err := os.MkdirAll(c.OutputDir, 0700); err != nil {
 		panic(fmt.Sprintf("createPages: %s: %v", c.OutputDir, err))
 	}
+	var wg sync.WaitGroup
 	for _, p := range c.Pages {
-		createPage(c, recs, p)
+		wg.Add(1)
+		createPage(c, recs, p, &wg)
 	}
+	wg.Wait()
 }
 
 const master = `<!DOCTYPE html>
@@ -86,20 +90,24 @@ const master = `<!DOCTYPE html>
 </html>
 `
 
-func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page) {
-	f, err := os.Create(filepath.Join(c.OutputDir, p.Filename))
-	if err != nil {
-		log.Fatalf("createPage: %v: %v", p, err)
-	}
-	defer f.Close()
+func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
+	go func() {
+		f, err := os.Create(filepath.Join(c.OutputDir, p.Filename))
+		if err != nil {
+			log.Fatalf("createPage: %v: %v", p, err)
+		}
+		defer f.Close()
 
-	t := template.Must(template.New("master").Parse(master))
-	if err := t.Execute(f, struct {
-		Cfg         *brow.Cfg
-		Recs        []brow.Rec
-		CurrentPage brow.Page
-	}{c, brow.Filter(recs, p), p},
-	); err != nil {
-		log.Println(err)
-	}
+		t := template.Must(template.New("master").Parse(master))
+		if err := t.Execute(f, struct {
+			Cfg         *brow.Cfg
+			Recs        []brow.Rec
+			CurrentPage brow.Page
+		}{c, brow.Filter(recs, p), p},
+		); err != nil {
+			log.Println(err)
+		}
+
+		wg.Done()
+	}()
 }
