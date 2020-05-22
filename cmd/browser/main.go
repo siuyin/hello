@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/siuyin/hello/brow"
 )
@@ -99,46 +98,8 @@ func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page) {
 		Cfg         *brow.Cfg
 		Recs        []brow.Rec
 		CurrentPage brow.Page
-	}{c, filter(recs, p), p},
+	}{c, brow.Filter(recs, p), p},
 	); err != nil {
 		log.Println(err)
 	}
-}
-func filter(recs []brow.Rec, p brow.Page) []brow.Rec {
-	recs = mediaFilter(recs, p)
-	recs = attrFilter(recs, p)
-	return recs
-}
-func mediaFilter(recs []brow.Rec, p brow.Page) []brow.Rec {
-	op := []brow.Rec{}
-	if (p.Filter == "" || p.Filter == "ALL") && (p.Ext == "" || p.Ext == "ALL") {
-		return recs
-	}
-	for _, r := range recs {
-		if strings.ToLower(filepath.Ext(r.Link)) != p.Ext {
-			continue
-		}
-		op = append(op, r)
-	}
-	return op
-}
-func attrFilter(recs []brow.Rec, p brow.Page) []brow.Rec {
-	if (p.Filter == "" || p.Filter == "ALL") && p.Ext != "" {
-		return recs
-	}
-
-	op := []brow.Rec{}
-	cond := p.Name
-	if p.Ext != "" {
-		cond = p.Filter
-	}
-	for _, r := range recs {
-		for _, a := range r.Attr {
-			if strings.Contains(a, cond) {
-				op = append(op, r)
-				continue
-			}
-		}
-	}
-	return op
 }

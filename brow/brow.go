@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -81,6 +83,46 @@ func attrs(r []string) []string {
 			continue
 		}
 		op = append(op, e)
+	}
+	return op
+}
+
+// Filter filters recs to return only requested records.
+func Filter(recs []Rec, p Page) []Rec {
+	recs = mediaFilter(recs, p)
+	recs = attrFilter(recs, p)
+	return recs
+}
+func mediaFilter(recs []Rec, p Page) []Rec {
+	op := []Rec{}
+	if (p.Filter == "" || p.Filter == "ALL") && (p.Ext == "" || p.Ext == "ALL") {
+		return recs
+	}
+	for _, r := range recs {
+		if strings.ToLower(filepath.Ext(r.Link)) != p.Ext {
+			continue
+		}
+		op = append(op, r)
+	}
+	return op
+}
+func attrFilter(recs []Rec, p Page) []Rec {
+	if (p.Filter == "" || p.Filter == "ALL") && p.Ext != "" {
+		return recs
+	}
+
+	op := []Rec{}
+	cond := p.Name
+	if p.Ext != "" {
+		cond = p.Filter
+	}
+	for _, r := range recs {
+		for _, a := range r.Attr {
+			if strings.Contains(a, cond) {
+				op = append(op, r)
+				continue
+			}
+		}
 	}
 	return op
 }
