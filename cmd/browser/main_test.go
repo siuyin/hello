@@ -6,16 +6,16 @@ import (
 )
 
 func TestReadConfig(t *testing.T) {
-	cfg := readConfig("testdata/sample.yaml")
+	cfg := ReadConfig("testdata/sample.yaml")
 	if v := cfg.InputFile; v != "/h/Downloads/data.csv" {
 		t.Errorf("unexpected value: %v", v)
 	}
 }
 
 func TestCreatePages(t *testing.T) {
-	cfg := readConfig("testdata/sample.yaml")
+	cfg := ReadConfig("testdata/sample.yaml")
 	os.RemoveAll(cfg.OutputDir)
-	recs := readData(cfg)
+	recs := ReadData(cfg)
 	createPages(cfg, recs)
 
 	t.Run("chkIndex", func(t *testing.T) {

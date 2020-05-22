@@ -1,41 +1,22 @@
 package main
 
 import (
-	"encoding/csv"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"github.com/siuyin/hello/brow"
 )
-
-type cfg struct {
-	InputFile string `yaml:"InputFile"`
-	OutputDir string `yaml:"OutputDir"`
-	Pages     []page `yaml:"Pages"`
-}
-type page struct {
-	Name     string `yaml:"Name"`
-	Filename string `yaml:"Filename"`
-	Filter   string `yaml:"Filter"`
-	Ext      string `yaml:"Ext"` // "" means all extensions
-}
-type rec struct {
-	Link      string
-	Thumbnail string
-	Attr      []string
-}
 
 func main() {
 	if !checkUsage() {
 		return
 	}
 	cfg := readConfig(os.Args[1])
-	recs := readData(cfg)
+	recs := brow.ReadData(cfg)
 	createPages(cfg, recs)
 }
 
@@ -51,60 +32,21 @@ eg.
 	return true
 }
 
-func readConfig(path string) *cfg {
-	c := new(cfg)
+func readConfig(path string) *brow.Cfg {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatalf("readConfig open: %s: %v", path, err)
 	}
 	defer f.Close()
 
-	b, err := ioutil.ReadAll(f)
+	cfg, err := brow.ReadConfig(f)
 	if err != nil {
-		log.Fatalf("readConfig read: %s: %v", path, err)
+		panic(err)
 	}
-
-	if err := yaml.Unmarshal(b, c); err != nil {
-		log.Fatalf("readConfig %s: %v", path, err)
-	}
-	return c
+	return cfg
 }
 
-func readData(c *cfg) []rec {
-	f, err := os.Open(c.InputFile)
-	if err != nil {
-		log.Fatalf("openInputFile: %s: %v", c.InputFile, err)
-	}
-	defer f.Close()
-
-	cr := csv.NewReader(f)
-	return parseData(cr)
-}
-func parseData(cr *csv.Reader) []rec {
-	rs, err := cr.ReadAll()
-	if err != nil {
-		log.Fatalf("parseData: %v", err)
-	}
-	op := []rec{}
-	for _, r := range rs[1:] { // skip header
-		rec := rec{Link: r[0], Thumbnail: r[1]}
-		rec.Attr = attrs(r)
-		op = append(op, rec)
-	}
-	return op
-}
-func attrs(r []string) []string {
-	op := []string{}
-	for _, e := range r[2:] {
-		if len(e) == 0 {
-			continue
-		}
-		op = append(op, e)
-	}
-	return op
-}
-
-func createPages(c *cfg, recs []rec) {
+func createPages(c *brow.Cfg, recs []brow.Rec) {
 	if err := os.MkdirAll(c.OutputDir, 0700); err != nil {
 		log.Fatalf("createPages: %s: %v", c.OutputDir, err)
 	}
@@ -145,7 +87,7 @@ const master = `<!DOCTYPE html>
 </html>
 `
 
-func createPage(c *cfg, recs []rec, p page) {
+func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page) {
 	f, err := os.Create(filepath.Join(c.OutputDir, p.Filename))
 	if err != nil {
 		log.Fatalf("createPage: %v: %v", p, err)
@@ -154,21 +96,21 @@ func createPage(c *cfg, recs []rec, p page) {
 
 	t := template.Must(template.New("master").Parse(master))
 	if err := t.Execute(f, struct {
-		Cfg         *cfg
-		Recs        []rec
-		CurrentPage page
+		Cfg         *brow.Cfg
+		Recs        []brow.Rec
+		CurrentPage brow.Page
 	}{c, filter(recs, p), p},
 	); err != nil {
 		log.Println(err)
 	}
 }
-func filter(recs []rec, p page) []rec {
+func filter(recs []brow.Rec, p brow.Page) []brow.Rec {
 	recs = mediaFilter(recs, p)
 	recs = attrFilter(recs, p)
 	return recs
 }
-func mediaFilter(recs []rec, p page) []rec {
-	op := []rec{}
+func mediaFilter(recs []brow.Rec, p brow.Page) []brow.Rec {
+	op := []brow.Rec{}
 	if (p.Filter == "" || p.Filter == "ALL") && (p.Ext == "" || p.Ext == "ALL") {
 		return recs
 	}
@@ -180,12 +122,12 @@ func mediaFilter(recs []rec, p page) []rec {
 	}
 	return op
 }
-func attrFilter(recs []rec, p page) []rec {
+func attrFilter(recs []brow.Rec, p brow.Page) []brow.Rec {
 	if (p.Filter == "" || p.Filter == "ALL") && p.Ext != "" {
 		return recs
 	}
 
-	op := []rec{}
+	op := []brow.Rec{}
 	cond := p.Name
 	if p.Ext != "" {
 		cond = p.Filter
