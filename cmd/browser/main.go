@@ -92,6 +92,8 @@ const master = `<!DOCTYPE html>
 
 func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
 	go func() {
+		defer wg.Done()
+
 		f, err := os.Create(filepath.Join(c.OutputDir, p.Filename))
 		if err != nil {
 			log.Fatalf("createPage: %v: %v", p, err)
@@ -108,6 +110,5 @@ func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
 			log.Println(err)
 		}
 
-		wg.Done()
 	}()
 }
