@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"html/template"
 	"log"
@@ -18,6 +19,7 @@ func main() {
 	cfg := readConfig(os.Args[1])
 	recs := brow.ReadData(cfg)
 	createPages(cfg, recs)
+	writeRatings(cfg, recs)
 }
 
 func checkUsage() bool {
@@ -109,6 +111,20 @@ func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
 		); err != nil {
 			log.Println(err)
 		}
-
 	}()
+}
+
+func writeRatings(cfg *brow.Cfg, recs []brow.Rec) {
+	rats := brow.ImageRating(recs)
+	f, err := os.Create(filepath.Join(cfg.OutputDir, "ratings.csv"))
+	if err != nil {
+		log.Fatalf("writeRatings: %v", err)
+	}
+	defer f.Close()
+	cw := csv.NewWriter(f)
+	defer cw.Flush()
+	cw.Write([]string{"Link", "Rating"})
+	for _, r := range rats {
+		cw.Write([]string{r.Link, r.Val})
+	}
 }
