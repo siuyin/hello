@@ -1,0 +1,32 @@
+InputFile: testdata/foo.csv
+OutputDir: bar
+Pages:
+- Name: fav
+  Filename: index.html
+
+- Name: foo
+  Filename: foo.html
+ 
+- Name: bar
+  Filename: bar.html
+
+- Name: jpg
+  Filename: jpg.html
+  Ext: .jpg
+  Filter: ALL
+
+- Name: fav jpg
+  Filename: favjpg.html
+  Filter: fav
+  Ext: .jpg
+
+- Name: fav avi
+  Filename: favavi.html
+  Filter: fav
+  Ext: .avi
+
+- Name: fav mp4
+  Filename: favmp4.html
+  Filter: fav
+  Ext: .mp4
+
