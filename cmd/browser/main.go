@@ -52,18 +52,22 @@ func readConfig(path string) *brow.Cfg {
 	return cfg
 }
 
-func createPages(c *brow.Cfg, recs []brow.Rec, mWG *sync.WaitGroup) {
-	defer mWG.Done()
+func createPages(c *brow.Cfg, recs []brow.Rec, mainWG *sync.WaitGroup) {
+	defer mainWG.Done()
 
-	if err := os.MkdirAll(c.OutputDir, 0700); err != nil {
-		panic(fmt.Sprintf("createPages: %s: %v", c.OutputDir, err))
-	}
+	createOutputDir(c)
+
 	var wg sync.WaitGroup
 	for _, p := range c.Pages {
 		wg.Add(1)
 		createPage(c, recs, p, &wg)
 	}
 	wg.Wait()
+}
+func createOutputDir(c *brow.Cfg) {
+	if err := os.MkdirAll(c.OutputDir, 0700); err != nil {
+		panic(fmt.Sprintf("createOutputDir: %s: %v", c.OutputDir, err))
+	}
 }
 
 const master = `<!DOCTYPE html>
@@ -102,10 +106,7 @@ func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
 	go func() {
 		defer wg.Done()
 
-		f, err := os.Create(filepath.Join(c.OutputDir, p.Filename))
-		if err != nil {
-			log.Fatalf("createPage: %v: %v", p, err)
-		}
+		f := createFile(c, p)
 		defer f.Close()
 
 		t := template.Must(template.New("master").Parse(master))
@@ -119,10 +120,17 @@ func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
 		}
 	}()
 }
+func createFile(c *brow.Cfg, p brow.Page) *os.File {
+	f, err := os.Create(filepath.Join(c.OutputDir, p.Filename))
+	if err != nil {
+		log.Fatalf("createPage: %v: %v", p, err)
+	}
+	return f
+}
 
-func writeRatings(cfg *brow.Cfg, recs []brow.Rec, mWG *sync.WaitGroup) {
+func writeRatings(cfg *brow.Cfg, recs []brow.Rec, mainWG *sync.WaitGroup) {
 	go func() {
-		defer mWG.Done()
+		defer mainWG.Done()
 
 		rats := brow.ImageRating(recs)
 		write(cfg, rats)
