@@ -109,15 +109,7 @@ func createPage(cfg *brow.Cfg, recs []brow.Rec, page brow.Page, wg *sync.WaitGro
 		f := createFile(cfg, page)
 		defer f.Close()
 
-		t := template.Must(template.New("master").Parse(master))
-		if err := t.Execute(f, struct {
-			Cfg         *brow.Cfg
-			Recs        []brow.Rec
-			CurrentPage brow.Page
-		}{cfg, brow.Filter(recs, page), page},
-		); err != nil {
-			log.Println(err)
-		}
+		writeOutput(f, cfg, recs, page)
 	}()
 }
 func createFile(c *brow.Cfg, p brow.Page) *os.File {
@@ -126,6 +118,21 @@ func createFile(c *brow.Cfg, p brow.Page) *os.File {
 		log.Fatalf("createPage: %v: %v", p, err)
 	}
 	return f
+}
+func writeOutput(f *os.File, cfg *brow.Cfg, recs []brow.Rec, page brow.Page) {
+	t := template.Must(template.New("master").Parse(master))
+	err := t.Execute(f, struct {
+		Cfg         *brow.Cfg
+		Recs        []brow.Rec
+		CurrentPage brow.Page
+	}{
+		cfg,
+		brow.Filter(recs, page),
+		page,
+	})
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func writeRatings(cfg *brow.Cfg, recs []brow.Rec, mainWG *sync.WaitGroup) {
