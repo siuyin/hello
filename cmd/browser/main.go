@@ -102,11 +102,11 @@ const master = `<!DOCTYPE html>
 </html>
 `
 
-func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
+func createPage(cfg *brow.Cfg, recs []brow.Rec, page brow.Page, wg *sync.WaitGroup) {
 	go func() {
 		defer wg.Done()
 
-		f := createFile(c, p)
+		f := createFile(cfg, page)
 		defer f.Close()
 
 		t := template.Must(template.New("master").Parse(master))
@@ -114,7 +114,7 @@ func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
 			Cfg         *brow.Cfg
 			Recs        []brow.Rec
 			CurrentPage brow.Page
-		}{c, brow.Filter(recs, p), p},
+		}{cfg, brow.Filter(recs, page), page},
 		); err != nil {
 			log.Println(err)
 		}
