@@ -70,38 +70,6 @@ func createOutputDir(c *brow.Cfg) {
 	}
 }
 
-const master = `<!DOCTYPE html>
-<html>
-<head>
-<title>Browse</title>
-<style>
-  body { font-size: 1em; font-family: Arial, Helvetica, sans-serif; }
-  nav { margin-bottom: 1em; }
-  .entry {margin-left: 0.5em; margin-bottom: 2em; }
-  .attr { background-color: LightBlue; margin:0.1em; padding:0.2em; border-radius: 10px; }
-</style>
-</head>
-
-<body>
-<h1>Listing</h1>
-<nav>
-  {{range .Cfg.Pages}} {{if eq .Name $.CurrentPage.Name}} {{.Name}} {{else}} <a href="{{.Filename}}">{{.Name}}</a> {{end}}{{end}}
-</nav>
-
-{{range $index, $element := .Recs}}
-  <div class="entry">
-    {{$index}}.
-    <a href="{{.Thumbnail}}" target="_blank"><img src="{{.Thumbnail}}" height="150px"/></a><br>
-    {{.Link}}<br>
-    {{range .Attr -}}<span class="attr">{{.}}</span>{{- end -}}
-  </div>
-{{end}}
-
-</body>
-
-</html>
-`
-
 func createPage(cfg *brow.Cfg, recs []brow.Rec, page brow.Page, wg *sync.WaitGroup) {
 	go func() {
 		defer wg.Done()
@@ -134,6 +102,39 @@ func writeOutput(f *os.File, cfg *brow.Cfg, recs []brow.Rec, page brow.Page) {
 		log.Println(err)
 	}
 }
+
+const master = `<!DOCTYPE html>
+<html>
+<head>
+<title>Browse</title>
+<style>
+  body { font-size: 1em; font-family: Arial, Helvetica, sans-serif; }
+  nav { margin-bottom: 1em; }
+  .entry {margin-left: 0.5em; margin-bottom: 2em; }
+  .attr { background-color: LightBlue; margin:0.1em; padding:0.2em; border-radius: 10px; }
+</style>
+</head>
+
+<body>
+<h1>Listing</h1>
+<nav>
+  {{ range .Cfg.Pages -}}
+    {{if eq .Name $.CurrentPage.Name}} {{.Name}} {{else}} <a href="{{.Filename}}">{{.Name}}</a> {{end}}
+  {{ end }}
+</nav>
+
+{{range $index, $element := .Recs}}
+  <div class="entry">
+    {{$index}}.
+    <a href="{{.Thumbnail}}" target="_blank"><img src="{{.Thumbnail}}" height="150px"/></a><br>
+    {{.Link}}<br>
+    {{range .Attr -}}<span class="attr">{{.}}</span>{{- end -}}
+  </div>
+{{end}}
+
+</body>
+
+</html>`
 
 func writeRatings(cfg *brow.Cfg, recs []brow.Rec, mainWG *sync.WaitGroup) {
 	go func() {
