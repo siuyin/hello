@@ -1,4 +1,4 @@
-InputFile: /h/Downloads/data.csv
+InputFile: testdata/foo.csv
 OutputDir: bar
 Pages:
 - Name: fav

@@ -140,6 +140,8 @@ func writeRatings(cfg *brow.Cfg, recs []brow.Rec, mainWG *sync.WaitGroup) {
 	go func() {
 		defer mainWG.Done()
 
+		createOutputDir(cfg)
+
 		rats := brow.ImageRating(recs)
 		write(cfg, rats)
 	}()

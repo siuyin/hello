@@ -33,3 +33,21 @@ func TestCreatePages(t *testing.T) {
 		}
 	})
 }
+
+func TestWriteRatings(t *testing.T) {
+	cfg := readConfig("testdata/sample.yaml")
+	os.RemoveAll(cfg.OutputDir)
+	recs := brow.ReadData(cfg)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	writeRatings(cfg, recs, &wg)
+	wg.Wait()
+
+	t.Run("checkOutput", func(t *testing.T) {
+		_, err := os.Stat("bar/ratings.csv")
+		if err != nil {
+			t.Error(err)
+		}
+	})
+}
