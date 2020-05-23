@@ -2,21 +2,19 @@ package main
 
 import (
 	"os"
+	"sync"
 	"testing"
+
+	"github.com/siuyin/hello/brow"
 )
 
-func TestReadConfig(t *testing.T) {
-	cfg := ReadConfig("testdata/sample.yaml")
-	if v := cfg.InputFile; v != "/h/Downloads/data.csv" {
-		t.Errorf("unexpected value: %v", v)
-	}
-}
-
 func TestCreatePages(t *testing.T) {
-	cfg := ReadConfig("testdata/sample.yaml")
+	cfg := readConfig("testdata/sample.yaml")
 	os.RemoveAll(cfg.OutputDir)
-	recs := ReadData(cfg)
-	createPages(cfg, recs)
+	recs := brow.ReadData(cfg)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	createPages(cfg, recs, &wg)
 
 	t.Run("chkIndex", func(t *testing.T) {
 		d, err := os.Open(cfg.OutputDir)
