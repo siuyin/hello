@@ -125,16 +125,21 @@ func writeRatings(cfg *brow.Cfg, recs []brow.Rec, mWG *sync.WaitGroup) {
 		defer mWG.Done()
 
 		rats := brow.ImageRating(recs)
-		f, err := os.Create(filepath.Join(cfg.OutputDir, "ratings.csv"))
-		if err != nil {
-			log.Fatalf("writeRatings: %v", err)
-		}
-		defer f.Close()
-		cw := csv.NewWriter(f)
-		defer cw.Flush()
-		cw.Write([]string{"Link", "Rating"})
-		for _, r := range rats {
-			cw.Write([]string{r.Link, r.Val})
-		}
+		write(cfg, rats)
 	}()
+}
+func write(cfg *brow.Cfg, rats []brow.Rating) {
+	f, err := os.Create(filepath.Join(cfg.OutputDir, "ratings.csv"))
+	if err != nil {
+		log.Fatalf("writeRatings: %v", err)
+	}
+	defer f.Close()
+
+	cw := csv.NewWriter(f)
+	defer cw.Flush()
+
+	cw.Write([]string{"Link", "Rating"})
+	for _, r := range rats {
+		cw.Write([]string{r.Link, r.Val})
+	}
 }
