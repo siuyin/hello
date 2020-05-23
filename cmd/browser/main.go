@@ -18,8 +18,12 @@ func main() {
 	}
 	cfg := readConfig(os.Args[1])
 	recs := brow.ReadData(cfg)
-	createPages(cfg, recs)
-	writeRatings(cfg, recs)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	createPages(cfg, recs, &wg)
+	writeRatings(cfg, recs, &wg)
+	wg.Wait()
 }
 
 func checkUsage() bool {
@@ -48,7 +52,9 @@ func readConfig(path string) *brow.Cfg {
 	return cfg
 }
 
-func createPages(c *brow.Cfg, recs []brow.Rec) {
+func createPages(c *brow.Cfg, recs []brow.Rec, mWG *sync.WaitGroup) {
+	defer mWG.Done()
+
 	if err := os.MkdirAll(c.OutputDir, 0700); err != nil {
 		panic(fmt.Sprintf("createPages: %s: %v", c.OutputDir, err))
 	}
@@ -81,7 +87,7 @@ const master = `<!DOCTYPE html>
 {{range $index, $element := .Recs}}
   <div class="entry">
     {{$index}}.
-    <a href="{{.Thumbnail}}"><img src="{{.Thumbnail}}" height="150px"/></a><br>
+    <a href="{{.Thumbnail}}" target="_blank"><img src="{{.Thumbnail}}" height="150px"/></a><br>
     {{.Link}}<br>
     {{range .Attr -}}<span class="attr">{{.}}</span>{{- end -}}
   </div>
@@ -114,17 +120,21 @@ func createPage(c *brow.Cfg, recs []brow.Rec, p brow.Page, wg *sync.WaitGroup) {
 	}()
 }
 
-func writeRatings(cfg *brow.Cfg, recs []brow.Rec) {
-	rats := brow.ImageRating(recs)
-	f, err := os.Create(filepath.Join(cfg.OutputDir, "ratings.csv"))
-	if err != nil {
-		log.Fatalf("writeRatings: %v", err)
-	}
-	defer f.Close()
-	cw := csv.NewWriter(f)
-	defer cw.Flush()
-	cw.Write([]string{"Link", "Rating"})
-	for _, r := range rats {
-		cw.Write([]string{r.Link, r.Val})
-	}
+func writeRatings(cfg *brow.Cfg, recs []brow.Rec, mWG *sync.WaitGroup) {
+	go func() {
+		defer mWG.Done()
+
+		rats := brow.ImageRating(recs)
+		f, err := os.Create(filepath.Join(cfg.OutputDir, "ratings.csv"))
+		if err != nil {
+			log.Fatalf("writeRatings: %v", err)
+		}
+		defer f.Close()
+		cw := csv.NewWriter(f)
+		defer cw.Flush()
+		cw.Write([]string{"Link", "Rating"})
+		for _, r := range rats {
+			cw.Write([]string{r.Link, r.Val})
+		}
+	}()
 }
