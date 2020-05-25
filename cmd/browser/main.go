@@ -148,13 +148,16 @@ func (ps *pageSet) writeOutput(f *os.File) {
 		PageLinks   []string
 	}{
 		ps.cfg,
-		brow.Filter(ps.recs, ps.page),
+		ps.filteredRecs(),
 		ps.page,
-		ps.pageLinks(brow.Filter(ps.recs, ps.page)),
+		ps.pageLinks(ps.filteredRecs()),
 	})
 	if err != nil {
 		log.Println(err)
 	}
+}
+func (ps *pageSet) filteredRecs() []brow.Rec {
+	return brow.Filter(ps.recs, ps.page)
 }
 func (ps *pageSet) pageLinks(recs []brow.Rec) []string {
 	const n = 100
