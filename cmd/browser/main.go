@@ -100,15 +100,15 @@ func (ps *pageSet) paginate() ([][]brow.Rec, []string) {
 	recSet := [][]brow.Rec{}
 	recs := ps.filteredRecs()
 	pls := ps.pageLinks()
-	for i := range pls {
-		recSet = append(recSet,
-			recs[i*ps.n:min(
-				(i+1)*ps.n,
-				len(recs),
-			)],
-		)
+	for pgNum := range pls {
+		recSet = append(recSet, ps.recRange(pgNum, recs))
 	}
 	return recSet, pls
+}
+func (ps *pageSet) recRange(pgNum int, recs []brow.Rec) []brow.Rec {
+	startIndex := pgNum * ps.n
+	endIndex := min((pgNum+1)*ps.n, len(recs))
+	return recs[startIndex:endIndex]
 }
 func min(a, b int) int {
 	if a < b {
@@ -146,9 +146,12 @@ func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
   {{ end }}
 </nav>
 
-<div class="page-links">
-  {{range $index, $element := .PageLinks}}<a class="page-link" href="{{.}}">{{$index}}</a>{{end}}
-</div>
+{{define "pageLinks"}}
+  <div class="page-links">
+    {{range $index, $element := .PageLinks}}<a class="page-link" href="{{.}}">{{$index}}</a>{{end}}
+  </div>
+{{end}}
+{{template "pageLinks" .}}
 
 {{range $index, $element := .Recs}}
   <div class="entry">
@@ -159,9 +162,7 @@ func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
   </div>
 {{end}}
 
-<div class="page-links">
-  {{range $index, $element := .PageLinks}}<a class="page-link" href="{{.}}">{{$index}}</a>{{end}}
-</div>
+{{template "pageLinks" .}}
 </body>
 
 </html>`
