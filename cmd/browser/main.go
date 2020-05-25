@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -151,7 +153,7 @@ func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
 
 {{define "pageLinks"}}
   <div class="page-links">
-    {{range $index, $element := .PageLinks}}<a class="page-link" href="{{.}}">{{$index}}</a>{{end}}
+    {{range $index, $element := .PageLinks}}{{if eq $.PageNum $index}}{{$index}}{{else}}<a class="page-link" href="{{.}}">{{$index}}</a>{{end}}{{end}}
   </div>
 {{end}}
 {{template "pageLinks" .}}
@@ -175,16 +177,30 @@ func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
 		Cfg         *brow.Cfg
 		Recs        []brow.Rec
 		CurrentPage brow.Page
+		PageNum     int
 		PageLinks   []string
 	}{
 		ps.cfg,
 		recs,
 		ps.page,
+		pageNum(f),
 		ps.pageLinks(),
 	})
 	if err != nil {
 		log.Println(err)
 	}
+}
+func pageNum(f *os.File) int {
+	re := regexp.MustCompile(`-(\d{1,}).html$`)
+	matches := re.FindStringSubmatch(f.Name())
+	if matches == nil {
+		return 0 // page zero has no -n suffix.
+	}
+	n, err := strconv.Atoi(matches[1])
+	if err != nil {
+		panic(fmt.Sprintf("bad page number in file %s", f.Name()))
+	}
+	return n
 }
 func (ps *pageSet) filteredRecs() []brow.Rec {
 	return brow.Filter(ps.recs, ps.page)
