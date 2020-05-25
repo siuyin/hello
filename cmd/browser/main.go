@@ -108,6 +108,8 @@ func (ps *pageSet) writeOutput(f *os.File) {
   nav { margin-bottom: 1em; }
   .entry {margin-left: 0.5em; margin-bottom: 2em; }
   .attr { background-color: LightBlue; margin:0.1em; padding:0.2em; border-radius: 10px; }
+  .page-links { margin: 1em; }
+  .page-link { margin: 0.5em; }
 </style>
 </head>
 
@@ -119,6 +121,10 @@ func (ps *pageSet) writeOutput(f *os.File) {
   {{ end }}
 </nav>
 
+<div class="page-links">
+  {{range $index, $element := .PageLinks}}<a class="page-link" href="{{.}}">{{$index}}</a>{{end}}
+</div>
+
 {{range $index, $element := .Recs}}
   <div class="entry">
     {{$index}}.
@@ -128,8 +134,8 @@ func (ps *pageSet) writeOutput(f *os.File) {
   </div>
 {{end}}
 
-<div class="pages">
-  {{range $index, $element := .PageLinks}}<a href="{{.}}">{{$index}}</a>{{end}}
+<div class="page-links">
+  {{range $index, $element := .PageLinks}}<a class="page-link" href="{{.}}">{{$index}}</a>{{end}}
 </div>
 </body>
 
@@ -144,7 +150,7 @@ func (ps *pageSet) writeOutput(f *os.File) {
 		ps.cfg,
 		brow.Filter(ps.recs, ps.page),
 		ps.page,
-		pages(ps.recs, ps.page),
+		pages(brow.Filter(ps.recs, ps.page), ps.page),
 	})
 	if err != nil {
 		log.Println(err)
