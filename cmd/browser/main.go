@@ -150,20 +150,20 @@ func (ps *pageSet) writeOutput(f *os.File) {
 		ps.cfg,
 		brow.Filter(ps.recs, ps.page),
 		ps.page,
-		pages(brow.Filter(ps.recs, ps.page), ps.page),
+		ps.pageLinks(brow.Filter(ps.recs, ps.page)),
 	})
 	if err != nil {
 		log.Println(err)
 	}
 }
-func pages(recs []brow.Rec, page brow.Page) []string {
+func (ps *pageSet) pageLinks(recs []brow.Rec) []string {
 	const n = 100
-	ret := []string{page.Filename}
+	ret := []string{ps.page.Filename}
 	if len(recs) < n {
 		return ret
 	}
 	for i := 1; i < len(recs)/n; i++ { // i := 1 as zero case handled above.
-		ret = append(ret, linkFilename(page.Filename, i))
+		ret = append(ret, linkFilename(ps.page.Filename, i))
 	}
 	return ret
 }
