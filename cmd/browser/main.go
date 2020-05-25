@@ -153,6 +153,7 @@ func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
 
 {{define "pageLinks"}}
   <div class="page-links">
+    page:
     {{range $index, $element := .PageLinks}}{{if eq $.PageNum $index}}{{$index}}{{else}}<a class="page-link" href="{{.}}">{{$index}}</a>{{end}}{{end}}
   </div>
 {{end}}
@@ -216,7 +217,7 @@ func (ps *pageSet) pageLinks() []string {
 		ret = append(ret, linkFilename(ps.page.Filename, i))
 	}
 	if len(recs)%ps.n > 0 {
-		ret = append(ret, linkFilename(ps.page.Filename, i+1)) // take care of last page
+		ret = append(ret, linkFilename(ps.page.Filename, i)) // take care of last page
 	}
 	return ret
 }
