@@ -71,24 +71,34 @@ func createOutputDir(c *brow.Cfg) {
 	}
 }
 
+type pageSet struct {
+	cfg  *brow.Cfg
+	recs []brow.Rec
+	page brow.Page
+}
+
 func createPage(cfg *brow.Cfg, recs []brow.Rec, page brow.Page, wg *sync.WaitGroup) {
 	go func() {
 		defer wg.Done()
 
-		f := createFile(cfg, page)
+		ps := newPageSet(cfg, recs, page)
+		f := ps.createFile()
 		defer f.Close()
 
-		writeOutput(f, cfg, recs, page)
+		ps.writeOutput(f)
 	}()
 }
-func createFile(c *brow.Cfg, p brow.Page) *os.File {
-	f, err := os.Create(filepath.Join(c.OutputDir, p.Filename))
+func newPageSet(cfg *brow.Cfg, recs []brow.Rec, page brow.Page) *pageSet {
+	return &pageSet{cfg, recs, page}
+}
+func (ps *pageSet) createFile() *os.File {
+	f, err := os.Create(filepath.Join(ps.cfg.OutputDir, ps.page.Filename))
 	if err != nil {
-		log.Fatalf("createPage: %v: %v", p, err)
+		log.Fatalf("createPage: %v: %v", ps.page, err)
 	}
 	return f
 }
-func writeOutput(f *os.File, cfg *brow.Cfg, recs []brow.Rec, page brow.Page) {
+func (ps *pageSet) writeOutput(f *os.File) {
 	const master = `<!DOCTYPE html>
 <html>
 <head>
@@ -131,10 +141,10 @@ func writeOutput(f *os.File, cfg *brow.Cfg, recs []brow.Rec, page brow.Page) {
 		CurrentPage brow.Page
 		PageLinks   []string
 	}{
-		cfg,
-		brow.Filter(recs, page),
-		page,
-		pages(recs, page),
+		ps.cfg,
+		brow.Filter(ps.recs, ps.page),
+		ps.page,
+		pages(ps.recs, ps.page),
 	})
 	if err != nil {
 		log.Println(err)
