@@ -210,14 +210,16 @@ func pageNum(f *os.File) int {
 func (ps *pageSet) pageLinks() []string {
 	recs := ps.filteredRecs()
 	ret := []string{ps.page.Filename}
-	if len(recs) < ps.recsPerPage {
+	n := ps.recsPerPage
+	if len(recs) < n {
 		return ret
 	}
+
 	var i int
-	for i = 1; i < len(recs)/ps.recsPerPage; i++ { // i := 1 as zero case handled above.
+	for i = 1; i < len(recs)/n; i++ { // i := 1 as zero case handled above.
 		ret = append(ret, linkFilename(ps.page.Filename, i))
 	}
-	if len(recs)%ps.recsPerPage > 0 {
+	if len(recs)%n > 0 {
 		ret = append(ret, linkFilename(ps.page.Filename, i)) // take care of last page
 	}
 	return ret
