@@ -75,30 +75,55 @@ type pageSet struct {
 	cfg  *brow.Cfg
 	recs []brow.Rec
 	page brow.Page
+	n    int
 }
 
 func createPage(cfg *brow.Cfg, recs []brow.Rec, page brow.Page, wg *sync.WaitGroup) {
+	const numPerPage = 100
 	go func() {
 		defer wg.Done()
 
-		ps := newPageSet(cfg, recs, page)
-		f := ps.createFile()
-		defer f.Close()
+		ps := newPageSet(cfg, recs, page, numPerPage)
+		recSet, linkSet := ps.paginate()
+		for i := 0; i < len(linkSet); i++ {
+			f := ps.createFile(linkSet[i])
+			defer f.Close()
 
-		ps.writeOutput(f)
+			ps.writeOutput(f, recSet[i])
+		}
 	}()
 }
-func newPageSet(cfg *brow.Cfg, recs []brow.Rec, page brow.Page) *pageSet {
-	return &pageSet{cfg, recs, page}
+func newPageSet(cfg *brow.Cfg, recs []brow.Rec, page brow.Page, numPerPage int) *pageSet {
+	return &pageSet{cfg, recs, page, numPerPage}
 }
-func (ps *pageSet) createFile() *os.File {
-	f, err := os.Create(filepath.Join(ps.cfg.OutputDir, ps.page.Filename))
+func (ps *pageSet) paginate() ([][]brow.Rec, []string) {
+	recSet := [][]brow.Rec{}
+	recs := ps.filteredRecs()
+	pls := ps.pageLinks()
+	for i := range pls {
+		recSet = append(recSet,
+			recs[i*ps.n:min(
+				(i+1)*ps.n,
+				len(recs),
+			)],
+		)
+	}
+	return recSet, pls
+}
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+func (ps *pageSet) createFile(fn string) *os.File {
+	f, err := os.Create(filepath.Join(ps.cfg.OutputDir, fn))
 	if err != nil {
-		log.Fatalf("createPage: %v: %v", ps.page, err)
+		log.Fatalf("createFile: %v: %v", fn, err)
 	}
 	return f
 }
-func (ps *pageSet) writeOutput(f *os.File) {
+func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
 	const master = `<!DOCTYPE html>
 <html>
 <head>
@@ -148,9 +173,9 @@ func (ps *pageSet) writeOutput(f *os.File) {
 		PageLinks   []string
 	}{
 		ps.cfg,
-		ps.filteredRecs(),
+		recs,
 		ps.page,
-		ps.pageLinks(ps.filteredRecs()),
+		ps.pageLinks(),
 	})
 	if err != nil {
 		log.Println(err)
@@ -159,14 +184,17 @@ func (ps *pageSet) writeOutput(f *os.File) {
 func (ps *pageSet) filteredRecs() []brow.Rec {
 	return brow.Filter(ps.recs, ps.page)
 }
-func (ps *pageSet) pageLinks(recs []brow.Rec) []string {
-	const n = 100
+func (ps *pageSet) pageLinks() []string {
+	recs := ps.filteredRecs()
 	ret := []string{ps.page.Filename}
-	if len(recs) < n {
+	if len(recs) < ps.n {
 		return ret
 	}
-	for i := 1; i < len(recs)/n; i++ { // i := 1 as zero case handled above.
+	for i := 1; i < len(recs)/ps.n; i++ { // i := 1 as zero case handled above.
 		ret = append(ret, linkFilename(ps.page.Filename, i))
+	}
+	if len(recs)%ps.n > 0 {
+		ret = append(ret, linkFilename(ps.page.Filename, len(recs)/ps.n+1)) // take care of last page
 	}
 	return ret
 }
