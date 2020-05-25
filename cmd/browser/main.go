@@ -190,11 +190,12 @@ func (ps *pageSet) pageLinks() []string {
 	if len(recs) < ps.n {
 		return ret
 	}
-	for i := 1; i < len(recs)/ps.n; i++ { // i := 1 as zero case handled above.
+	var i int
+	for i = 1; i < len(recs)/ps.n; i++ { // i := 1 as zero case handled above.
 		ret = append(ret, linkFilename(ps.page.Filename, i))
 	}
 	if len(recs)%ps.n > 0 {
-		ret = append(ret, linkFilename(ps.page.Filename, len(recs)/ps.n+1)) // take care of last page
+		ret = append(ret, linkFilename(ps.page.Filename, i+1)) // take care of last page
 	}
 	return ret
 }
