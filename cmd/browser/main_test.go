@@ -51,3 +51,13 @@ func TestWriteRatings(t *testing.T) {
 		}
 	})
 }
+
+func TestPages(t *testing.T) {
+	cfg := readConfig("testdata/sample.yaml")
+	recs := brow.ReadData(cfg)
+	page := cfg.Pages[0]
+	ps := pages(recs, page)
+	if v := len(ps); v == 0 {
+		t.Errorf("there should be at least one page, unexpected value: %v", v)
+	}
+}

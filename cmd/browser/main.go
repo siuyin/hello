@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/siuyin/hello/brow"
@@ -88,22 +89,7 @@ func createFile(c *brow.Cfg, p brow.Page) *os.File {
 	return f
 }
 func writeOutput(f *os.File, cfg *brow.Cfg, recs []brow.Rec, page brow.Page) {
-	t := template.Must(template.New("master").Parse(master))
-	err := t.Execute(f, struct {
-		Cfg         *brow.Cfg
-		Recs        []brow.Rec
-		CurrentPage brow.Page
-	}{
-		cfg,
-		brow.Filter(recs, page),
-		page,
-	})
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-const master = `<!DOCTYPE html>
+	const master = `<!DOCTYPE html>
 <html>
 <head>
 <title>Browse</title>
@@ -132,9 +118,42 @@ const master = `<!DOCTYPE html>
   </div>
 {{end}}
 
+<div class="pages">
+  {{range $index, $element := .PageLinks}}<a href="{{.}}">{{$index}}</a>{{end}}
+</div>
 </body>
 
 </html>`
+	t := template.Must(template.New("master").Parse(master))
+	err := t.Execute(f, struct {
+		Cfg         *brow.Cfg
+		Recs        []brow.Rec
+		CurrentPage brow.Page
+		PageLinks   []string
+	}{
+		cfg,
+		brow.Filter(recs, page),
+		page,
+		pages(recs, page),
+	})
+	if err != nil {
+		log.Println(err)
+	}
+}
+func pages(recs []brow.Rec, page brow.Page) []string {
+	const n = 100
+	ret := []string{page.Filename}
+	if len(recs) < n {
+		return ret
+	}
+	for i := 1; i < len(recs)/n; i++ { // i := 1 as zero case handled above.
+		ret = append(ret, linkFilename(page.Filename, i))
+	}
+	return ret
+}
+func linkFilename(fn string, index int) string {
+	return fmt.Sprintf("%s-%d.html", strings.Split(filepath.Base(fn), ".")[0], index)
+}
 
 func writeRatings(cfg *brow.Cfg, recs []brow.Rec, mainWG *sync.WaitGroup) {
 	go func() {
