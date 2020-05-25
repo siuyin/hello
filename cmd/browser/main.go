@@ -140,11 +140,14 @@ func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
 
 <body>
 <h1>Listing</h1>
-<nav>
-  {{ range .Cfg.Pages -}}
-    {{if eq .Name $.CurrentPage.Name}} {{.Name}} {{else}} <a href="{{.Filename}}">{{.Name}}</a> {{end}}
-  {{ end }}
-</nav>
+{{define "nav"}}
+  <nav>
+    {{ range .Cfg.Pages -}}
+      {{if eq .Name $.CurrentPage.Name}} {{.Name}} {{else}} <a href="{{.Filename}}">{{.Name}}</a> {{end}}
+    {{ end }}
+  </nav>
+{{end}}
+{{template "nav" .}}
 
 {{define "pageLinks"}}
   <div class="page-links">
@@ -163,6 +166,7 @@ func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
 {{end}}
 
 {{template "pageLinks" .}}
+{{template "nav" .}}
 </body>
 
 </html>`
