@@ -74,10 +74,10 @@ func createOutputDir(c *brow.Cfg) {
 }
 
 type pageSet struct {
-	cfg  *brow.Cfg
-	recs []brow.Rec
-	page brow.Page
-	n    int
+	cfg         *brow.Cfg
+	recs        []brow.Rec
+	page        brow.Page
+	recsPerPage int
 }
 
 func createPage(cfg *brow.Cfg, recs []brow.Rec, page brow.Page, wg *sync.WaitGroup) {
@@ -108,8 +108,8 @@ func (ps *pageSet) paginate() ([][]brow.Rec, []string) {
 	return recSet, pls
 }
 func (ps *pageSet) recRange(pgNum int, recs []brow.Rec) []brow.Rec {
-	startIndex := pgNum * ps.n
-	endIndex := min((pgNum+1)*ps.n, len(recs))
+	startIndex := pgNum * ps.recsPerPage
+	endIndex := min((pgNum+1)*ps.recsPerPage, len(recs))
 	return recs[startIndex:endIndex]
 }
 func min(a, b int) int {
@@ -174,8 +174,8 @@ func (ps *pageSet) writeOutput(f *os.File, recs []brow.Rec) {
 
 {{template "pageLinks" .}}
 {{template "nav" .}}
-</body>
 
+</body>
 </html>`
 	t := template.Must(template.New("master").Parse(master))
 	err := t.Execute(f, struct {
@@ -201,29 +201,29 @@ func pageNum(f *os.File) int {
 	if matches == nil {
 		return 0 // page zero has no -n suffix.
 	}
-	n, err := strconv.Atoi(matches[1])
+	n, err := strconv.Atoi(matches[1]) // matches[0] is the whole string.
 	if err != nil {
 		panic(fmt.Sprintf("bad page number in file %s", f.Name()))
 	}
 	return n
 }
-func (ps *pageSet) filteredRecs() []brow.Rec {
-	return brow.Filter(ps.recs, ps.page)
-}
 func (ps *pageSet) pageLinks() []string {
 	recs := ps.filteredRecs()
 	ret := []string{ps.page.Filename}
-	if len(recs) < ps.n {
+	if len(recs) < ps.recsPerPage {
 		return ret
 	}
 	var i int
-	for i = 1; i < len(recs)/ps.n; i++ { // i := 1 as zero case handled above.
+	for i = 1; i < len(recs)/ps.recsPerPage; i++ { // i := 1 as zero case handled above.
 		ret = append(ret, linkFilename(ps.page.Filename, i))
 	}
-	if len(recs)%ps.n > 0 {
+	if len(recs)%ps.recsPerPage > 0 {
 		ret = append(ret, linkFilename(ps.page.Filename, i)) // take care of last page
 	}
 	return ret
+}
+func (ps *pageSet) filteredRecs() []brow.Rec {
+	return brow.Filter(ps.recs, ps.page)
 }
 func linkFilename(fn string, index int) string {
 	return fmt.Sprintf("%s-%d.html", strings.Split(filepath.Base(fn), ".")[0], index)
