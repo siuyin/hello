@@ -119,7 +119,7 @@ func attrFilter(recs []Rec, p Page) []Rec {
 	}
 	for _, r := range recs {
 		for _, a := range r.Attr {
-			if strings.Contains(a, cond) {
+			if strings.Contains(strings.ToLower(a), cond) {
 				op = append(op, r)
 				continue
 			}
