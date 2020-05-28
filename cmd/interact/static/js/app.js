@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', (event) => {
-  console.log('DOM fully loaded and parsed');
   searchHandler();
 });
 
@@ -16,7 +15,6 @@ async function createSelection(listPromise) {
     ss.style.display = "none";
     return;
   }
-  console.log(`creating ${list}`);
   csCreate(list);
   ss.style.display = "block";
 }
