@@ -23,10 +23,12 @@ var (
 	providerURI  = dflt.EnvString("IDP_URL", ibmProvider)
 	clientID     = dflt.EnvString("CLIENT_ID", ibmClientID)
 	clientSecret = dflt.EnvString("CLIENT_SECRET", ibmClientSecret)
+	redirectURL  = dflt.EnvString("REDIRECT_URL", "https://rasp.beyondbroadcast.com/auth/oidc/callback")
 )
 
 func main() {
 	fmt.Println("OpenID Connect example")
+	fmt.Printf("openid scope: %#v.\n", oidc.ScopeOpenID)
 
 	// root handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -48,20 +50,23 @@ func main() {
 	if err := provider.Claims(&claims); err != nil {
 		log.Println(err)
 	}
-	fmt.Println(claims.ScopesSupported)
-	fmt.Println(claims.ClaimsSupported)
-	fmt.Println(provider.Endpoint())
+	fmt.Printf("scopes supported: %v\n", claims.ScopesSupported)
+	fmt.Printf("claims supported: %v\n", claims.ClaimsSupported)
+	fmt.Printf("provider endpoint: %v\n", provider.Endpoint())
 	config := oauth2.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  "https://rasp.beyondbroadcast.com/auth/oidc/callback",
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+		RedirectURL:  redirectURL,
+		Scopes:       []string{oidc.ScopeOpenID, "email", "profile", "roles"},
 	}
 
 	// login handler
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Redirecting to ID provider: %s\n", providerURI)
+		log.Printf("URL: %s", config.AuthCodeURL(state,
+			oauth2.SetAuthURLParam("code_challenge", "abc123ifjsalfjldfsIOfjldsjflasjlfsdjlfdslkjlsdfjlfslkfs"),
+		))
 		http.Redirect(w, r, config.AuthCodeURL(state,
 			oauth2.SetAuthURLParam("code_challenge", "abc123ifjsalfjldfsIOfjldsjflasjlfsdjlfdslkjlsdfjlfslkfs"),
 		),
@@ -88,6 +93,7 @@ func main() {
 			http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+		fmt.Printf("code token expiry: %v\n", oauth2Token.Expiry)
 		// Extract the ID Token from OAuth2 token.
 		rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 		if !ok {
@@ -101,14 +107,6 @@ func main() {
 			return
 		}
 
-		var claims struct {
-			GroupIDs []string `json:"groupIds"`
-		}
-		if err := idToken.Claims(&claims); err != nil {
-			http.Error(w, "Failed extract claims: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Println(claims)
 		fmt.Printf("idToken: %s\n", idToken)
 
 		userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
@@ -119,10 +117,15 @@ func main() {
 		fmt.Printf("userInfo: %v\n", userInfo)
 
 		resp := struct {
-			OAuth2Token *oauth2.Token
-			UserInfo    *oidc.UserInfo
-			IDToken     *oidc.IDToken
-		}{oauth2Token, userInfo, idToken}
+			OAuth2Token   *oauth2.Token
+			UserInfo      *oidc.UserInfo
+			IDToken       *oidc.IDToken
+			IDTokenClaims *json.RawMessage
+		}{oauth2Token, userInfo, idToken, new(json.RawMessage)}
+		if err := idToken.Claims(&resp.IDTokenClaims); err != nil {
+			http.Error(w, "Failed extract claims: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 		data, err := json.MarshalIndent(resp, "", "    ")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -136,6 +139,7 @@ func main() {
 
 	// start serving
 	log.Println("Starting http server.")
-	log.Fatal(http.ListenAndServeTLS(":8080", "/h/certbot/rasp.beyondbroadcast.com/fullchain.pem",
-		"/h/certbot/rasp.beyondbroadcast.com/privkey.pem", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
+	//log.Fatal(http.ListenAndServeTLS(":8080", "/h/certbot/rasp.beyondbroadcast.com/fullchain.pem",
+	//	"/h/certbot/rasp.beyondbroadcast.com/privkey.pem", nil))
 }
