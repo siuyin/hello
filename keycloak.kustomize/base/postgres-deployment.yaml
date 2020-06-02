@@ -15,7 +15,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /data/kcl-postgres-dev # customize me
+    path: /data/kcl-postgres-prod # customize me
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -23,7 +23,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - samsung # customize me
+          - ln02 # customize me
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
