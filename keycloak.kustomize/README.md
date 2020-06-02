@@ -14,6 +14,10 @@ This causes a conflict as the docker images have
 built-in clustering and clustering has not (yet)
 been properly configured.
 
+Secrets are in base directory. Rename sample
+files to secret extension.
+Eg keycloak.sample -> keycloak.secret
+
 ## Showing resources
 
 ```sh
