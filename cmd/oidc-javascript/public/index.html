@@ -5,15 +5,20 @@
     <script src="http://localhost:31173/auth/js/keycloak.js"></script>
     <script>
       var keycloak = new Keycloak();
+
       keycloak.init({'onLoad': 'login-required'})
       .then(function() {
         let logoutLink = document.getElementById("logout");
         logoutLink.setAttribute("href",keycloak.createLogoutUrl({'redirectUri':'http://localhost:8080/'}));
         logoutLink.innerText = `logout: ${keycloak.idTokenParsed.name}`;
       })
+
       .then(function() {
-        keycloak.updateToken(30).catch(function() {alert('failed to refresh token')});
+        setInterval(function() {
+          keycloak.updateToken(30).catch(function() {alert('failed to refresh token')});
+        },1000);
       })
+
       .catch(function() {
           alert('failed to initialize');
       });
