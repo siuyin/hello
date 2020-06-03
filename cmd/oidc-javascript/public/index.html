@@ -19,6 +19,10 @@
         },1000);
       })
 
+      .then(function() {
+        console.log(keycloak.realmAccess.roles);
+      })
+
       .catch(function() {
           alert('failed to initialize');
       });
