@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OIDC Demo</title>
+    <script src="http://localhost:31173/auth/js/keycloak.js"></script>
+    <script>
+      var keycloak = new Keycloak();
+      keycloak.init({'onLoad': 'login-required'})
+      .then(function() {
+        let logoutLink = document.getElementById("logout");
+        logoutLink.setAttribute("href",keycloak.createLogoutUrl({'redirectUri':'http://localhost:8080/'}));
+        logoutLink.innerText = `logout: ${keycloak.idTokenParsed.name}`;
+      })
+      .then(function() {
+        keycloak.updateToken(30).catch(function() {alert('failed to refresh token')});
+      })
+      .catch(function() {
+          alert('failed to initialize');
+      });
+    </script>
+  </head>
+  <body>
+    <a id="logout" href="#">logout</a>
+    <h1>Hello World</h1>
+    <p>This page is protected and requires a valid login to view.
+    <p>If you see this content you have successfully logged in.
+  </body>
+</html>

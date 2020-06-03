@@ -1,0 +1,8 @@
+{
+  "realm": "home",
+  "auth-server-url": "http://localhost:31173/auth/",
+  "ssl-required": "none",
+  "resource": "js",
+  "public-client": true,
+  "confidential-port": 0
+}
