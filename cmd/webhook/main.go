@@ -42,7 +42,8 @@ func call(endpoint string, authz string) *http.Response {
 	//resp, err := http.Post("http://127.0.0.1:8080/foo", "text/plain", strings.NewReader("Brown Fox"))
 
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", baseURL+endpoint, strings.NewReader("Brown Fox"))
+	msg := fmt.Sprintf("Brown Fox: %s", time.Now().Format("15:04:05.000"))
+	req, err := http.NewRequest("POST", baseURL+endpoint, strings.NewReader(msg))
 	req.Header.Add("Authorization", authz)
 	resp, err := client.Do(req)
 	if err != nil {
