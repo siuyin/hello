@@ -27,8 +27,9 @@ const baseURL = "http://127.0.0.1:8080"
 
 func callWebhookWorker() {
 	go func() {
+		client := &http.Client{}
 		for {
-			resp := call("/foo", "gerbau")
+			resp := call(client, "/foo", "gerbau") // make client into a type if more parameters needed.
 			defer resp.Body.Close()
 
 			body := getBody(resp)
@@ -38,10 +39,9 @@ func callWebhookWorker() {
 		}
 	}()
 }
-func call(endpoint string, authz string) *http.Response {
+func call(client *http.Client, endpoint string, authz string) *http.Response {
 	//resp, err := http.Post("http://127.0.0.1:8080/foo", "text/plain", strings.NewReader("Brown Fox"))
 
-	client := &http.Client{}
 	msg := fmt.Sprintf("Brown Fox: %s", time.Now().Format("15:04:05.000"))
 	req, err := http.NewRequest("POST", baseURL+endpoint, strings.NewReader(msg))
 	req.Header.Add("Authorization", authz)
