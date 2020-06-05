@@ -23,6 +23,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
+const baseURL = "http://127.0.0.1:8080"
+
 func postToFooWorker() {
 	go func() {
 		for {
@@ -40,7 +42,7 @@ func call(endpoint string, authz string) *http.Response {
 	//resp, err := http.Post("http://127.0.0.1:8080/foo", "text/plain", strings.NewReader("Brown Fox"))
 
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", "http://127.0.0.1:8080"+endpoint, strings.NewReader("Brown Fox"))
+	req, err := http.NewRequest("POST", baseURL+endpoint, strings.NewReader("Brown Fox"))
 	req.Header.Add("Authorization", authz)
 	resp, err := client.Do(req)
 	if err != nil {
