@@ -16,16 +16,13 @@ func main() {
 	postToFoo()
 
 	http.HandleFunc("/foo", func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			log.Println(err)
-		}
-		log.Printf("hook called, body: %s, headers: %v", body, r.Header)
+		displayAndLogHookCall(r)
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+
 func postToFoo() {
 	go func() {
 		for {
@@ -56,4 +53,12 @@ func getBody(resp *http.Response) []byte {
 		log.Println(err)
 	}
 	return body
+}
+
+func displayAndLogHookCall(r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("hook called, body: %s, headers: %v", body, r.Header)
 }
