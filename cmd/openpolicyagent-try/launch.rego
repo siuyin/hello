@@ -14,13 +14,13 @@ oxygen = "go" {
 	input.o2_vol_l >= 1700
 }
 
-default launch = "nogo"
+default decision = "nogo"
 
-launch = "go" {
+decision = "go" {
 	fuel == "go"
 	oxygen == "go"
 }
 
-launch = "go" {
+decision = "go" {
 	input.director_ok
 }
