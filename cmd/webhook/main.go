@@ -13,7 +13,7 @@ import (
 func main() {
 	fmt.Println("webhook example")
 
-	postToFoo()
+	postToFooWorker()
 
 	http.HandleFunc("/foo", func(w http.ResponseWriter, r *http.Request) {
 		displayAndLogHookCall(r)
@@ -23,7 +23,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func postToFoo() {
+func postToFooWorker() {
 	go func() {
 		for {
 			resp := call("/foo", "gerbau")
@@ -31,6 +31,7 @@ func postToFoo() {
 
 			body := getBody(resp)
 			fmt.Printf("received: %s\n", body)
+
 			time.Sleep(time.Second)
 		}
 	}()
@@ -39,8 +40,8 @@ func call(endpoint string, authz string) *http.Response {
 	//resp, err := http.Post("http://127.0.0.1:8080/foo", "text/plain", strings.NewReader("Brown Fox"))
 
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", "http://127.0.0.1:8080/foo", strings.NewReader("Brown Fox"))
-	req.Header.Add("Authorization", "gerbau")
+	req, err := http.NewRequest("POST", "http://127.0.0.1:8080"+endpoint, strings.NewReader("Brown Fox"))
+	req.Header.Add("Authorization", authz)
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
