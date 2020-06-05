@@ -13,7 +13,7 @@ import (
 func main() {
 	fmt.Println("webhook example")
 
-	postToFooWorker()
+	callWebhookWorker()
 
 	http.HandleFunc("/foo", func(w http.ResponseWriter, r *http.Request) {
 		displayAndLogHookCall(r)
@@ -25,7 +25,7 @@ func main() {
 
 const baseURL = "http://127.0.0.1:8080"
 
-func postToFooWorker() {
+func callWebhookWorker() {
 	go func() {
 		for {
 			resp := call("/foo", "gerbau")
