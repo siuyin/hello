@@ -1,10 +1,10 @@
-apiVersion: skaffold/v2beta4
+apiVersion: skaffold/v2beta1
 kind: Config
 build:
   artifacts:
   - image: siuyin/junk
-    docker:
-      dockerfile: Dockerfile
   tagPolicy:
     envTemplate:
       template: "{{.IMAGE_NAME}}:{{.RELEASE}}"
+  local:
+    push: true

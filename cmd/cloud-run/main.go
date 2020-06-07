@@ -13,7 +13,7 @@ func main() {
 	fmt.Println("service starting on port", port)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello\n")
+		fmt.Fprintf(w, "Hello world!\n")
 	})
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
