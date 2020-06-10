@@ -12,17 +12,27 @@ import (
 
 func main() {
 	fmt.Println("open policy agent as a go library")
+
 	r := rego.New(
 		rego.Query("x = data.launch"),
-		rego.Load([]string{"./launch.rego"}, nil))
+		rego.Load([]string{"./launch.rego"}, nil),
+	)
 
-	ctx := context.Background()
-	query, err := r.PrepareForEval(ctx)
+	input := loadInput("./launch_input.json")
+
+	query := prepareEvalQuery(r)
+	rs, err := query.Eval(context.Background(), rego.EvalInput(input)) // rs: result set
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bs, err := ioutil.ReadFile("./launch_input.json")
+	fmt.Println("Result:", rs[0].Bindings["x"])
+	fmt.Println("Decision:", rs[0].Bindings["x"].(map[string]interface{})["decision"])
+}
+
+func loadInput(inp string) interface{} {
+
+	bs, err := ioutil.ReadFile(inp)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,13 +42,13 @@ func main() {
 	if err := json.Unmarshal(bs, &input); err != nil {
 		log.Fatal(err)
 	}
+	return input
+}
 
-	rs, err := query.Eval(ctx, rego.EvalInput(input))
+func prepareEvalQuery(r *rego.Rego) rego.PreparedEvalQuery {
+	query, err := r.PrepareForEval(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println("Result:", rs[0].Bindings["x"])
-	fmt.Println("Decision:", rs[0].Bindings["x"].(map[string]interface{})["decision"])
-
+	return query
 }
