@@ -14,6 +14,7 @@ require (
 	github.com/nats-io/nkeys v0.0.2
 	github.com/nats-io/nuid v1.0.1
 	github.com/nats-io/stan.go v0.5.0
+	github.com/open-policy-agent/opa v0.20.5
 	github.com/peterh/liner v1.1.0 // indirect
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
