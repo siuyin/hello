@@ -13,14 +13,15 @@ import (
 func main() {
 	fmt.Println("open policy agent as a go library")
 
-	r := rego.New(
+	pa := rego.New( // pa: policy agent
 		rego.Query("x = data.launch"),
 		rego.Load([]string{"./launch.rego"}, nil),
 	)
 
-	input := loadInput("./launch_input.json")
+	input := jsonFileInput("./launch_input.json")
+	//input := directInput()
 
-	query := prepareEvalQuery(r)
+	query := prepareEvalQuery(pa)
 	rs, err := query.Eval(context.Background(), rego.EvalInput(input)) // rs: result set
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +31,7 @@ func main() {
 	fmt.Println("Decision:", rs[0].Bindings["x"].(map[string]interface{})["decision"])
 }
 
-func loadInput(inp string) interface{} {
+func jsonFileInput(inp string) interface{} {
 
 	bs, err := ioutil.ReadFile(inp)
 	if err != nil {
@@ -43,6 +44,14 @@ func loadInput(inp string) interface{} {
 		log.Fatal(err)
 	}
 	return input
+}
+
+func directInput() interface{} {
+	return map[string]interface{}{
+		"f_mass_kg":   700,
+		"o2_vol_l":    1000,
+		"director_ok": false,
+	}
 }
 
 func prepareEvalQuery(r *rego.Rego) rego.PreparedEvalQuery {
