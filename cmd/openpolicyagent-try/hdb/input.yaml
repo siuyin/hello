@@ -1,0 +1,17 @@
+applicants:
+- applicant:
+    name: John
+    age: 20
+    citizen_of: Singapore
+    resident_status_in_singapore: citizen # citizen, pr or other
+    previously_bought_new_hdb_or_dbss_or_ec: false
+    number_of_previously_purchased_new_hdb_or_dbss_or_ec: 0
+    received_cpf_housing_grant: false
+- applicant:
+    name: Mary
+    age: 21
+    citizen_of: Malaysia
+    resident_status_in_singapore: pr # citizen, pr or other
+    previously_bought_new_hdb_or_dbss_or_ec: false
+    number_of_previously_purchased_new_hdb_or_dbss_or_ec: 0
+    received_cpf_housing_grant: false
