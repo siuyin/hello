@@ -1,6 +1,7 @@
 applicants:
 - applicant:
     name: John
+    date_of_birth: 28-jun-1962 # eg 25-dec-1999
     age: 20
     citizen_of: Singapore
     resident_status_in_singapore: citizen # citizen, pr or other
@@ -9,6 +10,7 @@ applicants:
     received_cpf_housing_grant: false
 - applicant:
     name: Mary
+    date_of_birth: 28-feb-1999 # eg 25-dec-1999
     age: 21
     citizen_of: Malaysia
     resident_status_in_singapore: pr # citizen, pr or other
