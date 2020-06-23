@@ -1,2 +1,2 @@
 #!/bin/sh
-opa test . ../../sytime -v
+opa test . ../../siuyin/time -v

@@ -1,4 +1,4 @@
-package sytime
+package siuyin.time
 
 double(a) = x {
   x := a*2

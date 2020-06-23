@@ -36,11 +36,11 @@ test_age {
   a == 2020
 }
 
-import data.sytime as st
+import data.siuyin.time as st
 
 test_format {
   t := time.parse_ns("2006-01-02T15:04:05Z-0700","2020-12-25T12:34:56Z+0800")
   s := st.format(t)
   trace(sprintf("s = %v",[s]))
-  s == "2020-12-25T04:34:57"
+  s == "2020-12-25T04:34:56"
 }
