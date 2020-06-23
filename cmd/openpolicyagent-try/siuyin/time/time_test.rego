@@ -27,6 +27,20 @@ test_age {
   trace(sprintf("age = %v",[a]))
   a == 57
 }
+test_age2 {
+  t := time.parse_ns("2006-01-02","2020-06-28")
+  bt := time.parse_ns("2006-01-02","1962-06-28")
+  a := age(t,bt)
+  trace(sprintf("age = %v",[a]))
+  a == 58
+}
+test_age3 {
+  t := time.parse_ns("2006-01-02","2020-06-29")
+  bt := time.parse_ns("2006-01-02","1962-06-28")
+  a := age(t,bt)
+  trace(sprintf("age = %v",[a]))
+  a == 58
+}
 
 test_double {
   d := double(3)
