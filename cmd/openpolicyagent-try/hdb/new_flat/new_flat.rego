@@ -12,3 +12,8 @@ age_eligible {
   bd = parse_date(input.applicants[_].applicant.date_of_birth)
   st.age(parse_date(input.date_of_application),bd) >= data.minimum_age
 }
+
+default at_least_one_singpore_citizen = false
+at_least_one_singpore_citizen {
+  input.applicants[_].applicant.resident_status_in_singapore == "citizen"
+}
