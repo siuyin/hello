@@ -13,7 +13,21 @@ age_eligible {
   st.age(parse_date(input.date_of_application),bd) >= data.minimum_age
 }
 
-default at_least_one_singpore_citizen = false
-at_least_one_singpore_citizen {
+default at_least_one_singapore_citizen = false
+at_least_one_singapore_citizen {
   input.applicants[_].applicant.resident_status_in_singapore == "citizen"
+}
+
+default two_singapore_citizens_or_a_citizen_and_a_pr = false
+two_singapore_citizens_or_a_citizen_and_a_pr {
+  some i,j
+  input.applicants[i].applicant.resident_status_in_singapore == "citizen"
+  input.applicants[j].applicant.resident_status_in_singapore == "citizen"
+  i != j
+}
+two_singapore_citizens_or_a_citizen_and_a_pr {
+  some i,j
+  input.applicants[i].applicant.resident_status_in_singapore == "citizen"
+  input.applicants[j].applicant.resident_status_in_singapore == "pr"
+  i != j
 }

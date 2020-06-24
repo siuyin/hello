@@ -29,28 +29,58 @@ test_age_eligible {
   ]}
 }
 
-test_citizen_criteria {
-  at_least_one_singpore_citizen with input as 
+test_at_least_one_singapore_citizen{
+  at_least_one_singapore_citizen with input as 
   {"applicants":[
     {"applicant":{"resident_status_in_singapore":"citizen"}},
     {"applicant":{"resident_status_in_singapore":"other"}}
   ]}
 
-  at_least_one_singpore_citizen with input as 
+  at_least_one_singapore_citizen with input as 
   {"applicants":[
     {"applicant":{"resident_status_in_singapore":"citizen"}},
     {"applicant":{"resident_status_in_singapore":"citizen"}}
   ]}
 
-  not at_least_one_singpore_citizen with input as 
+  not at_least_one_singapore_citizen with input as 
   {"applicants":[
     {"applicant":{"resident_status_in_singapore":"pr"}},
     {"applicant":{"resident_status_in_singapore":"other"}}
   ]}
 
-  not at_least_one_singpore_citizen with input as 
+  not at_least_one_singapore_citizen with input as 
   {"applicants":[
     {"applicant":{"resident_status_in_singapore":"other"}},
+    {"applicant":{"resident_status_in_singapore":"other"}}
+  ]}
+}
+
+test_two_singapore_citizens_or_a_citizen_and_a_pr {
+  # two citizens
+  two_singapore_citizens_or_a_citizen_and_a_pr with input as
+  {"applicants":[
+    {"applicant":{"resident_status_in_singapore":"citizen"}},
+    {"applicant":{"resident_status_in_singapore":"citizen"}}
+  ]}
+
+  # citizen and pr
+  two_singapore_citizens_or_a_citizen_and_a_pr with input as
+  {"applicants":[
+    {"applicant":{"resident_status_in_singapore":"citizen"}},
+    {"applicant":{"resident_status_in_singapore":"pr"}}
+  ]}
+
+  # no citizen or pr
+  not two_singapore_citizens_or_a_citizen_and_a_pr with input as
+  {"applicants":[
+    {"applicant":{"resident_status_in_singapore":"other"}},
+    {"applicant":{"resident_status_in_singapore":"other"}}
+  ]}
+
+  # one pr 
+  not two_singapore_citizens_or_a_citizen_and_a_pr with input as
+  {"applicants":[
+    {"applicant":{"resident_status_in_singapore":"pr"}},
     {"applicant":{"resident_status_in_singapore":"other"}}
   ]}
 }
