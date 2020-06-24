@@ -1,4 +1,5 @@
 # Package time provides time related functions written in rego.
+# Time in rego is represented as the nanoseconds elapsed since unix epoch (1970-01-01 UTC).
 package siuyin.time
 
 
