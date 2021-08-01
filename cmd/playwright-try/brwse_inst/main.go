@@ -40,7 +40,12 @@ func browserPage(pw *playwright.Playwright) (playwright.Browser, playwright.Page
 	}
 	fmt.Printf("Browser version: %s %s\n", pw.Chromium.Name(), browser.Version())
 
-	page, err := browser.NewPage()
+	ctx, err := browser.NewContext()
+	if err != nil {
+		log.Fatalf("could not create context: %v", err)
+	}
+
+	page, err := ctx.NewPage()
 	if err != nil {
 		log.Fatalf("could not create page: %v", err)
 	}
