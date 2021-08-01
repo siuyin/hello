@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 
 	"github.com/mxschmitt/playwright-go"
@@ -15,6 +16,7 @@ func main() {
 	defer clsBrowser(brwse)
 
 	scrape(pg)
+	screenshot(pg)
 }
 
 func initPlaywright() *playwright.Playwright {
@@ -71,6 +73,15 @@ func scrape(pg playwright.Page) {
 		}
 		fmt.Printf("%d: %s\n", i+1, title)
 	}
+}
+
+func screenshot(pg playwright.Page) {
+	ss, err := pg.Screenshot()
+	if err != nil {
+		log.Printf("screenshot error: %v", err)
+	}
+
+	ioutil.WriteFile("screenshot.png", ss, 0644)
 }
 
 func clsBrowser(browser playwright.Browser) {
