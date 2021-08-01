@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/mxschmitt/playwright-go"
+	"golang.org/x/text/message"
 )
 
 func main() {
@@ -51,13 +53,12 @@ func browserPage(pw *playwright.Playwright) (playwright.Browser, playwright.Page
 	if err != nil {
 		log.Fatalf("could not create page: %v", err)
 	}
-	if _, err = page.Goto("https://news.ycombinator.com"); err != nil {
-		log.Fatalf("could not goto: %v", err)
-	}
 	return browser, page
 }
 
 func scrape(pg playwright.Page) {
+	waitForPageLoad(pg)
+
 	entries, err := pg.QuerySelectorAll(".athing")
 	if err != nil {
 		log.Fatalf("could not get entries: %v", err)
@@ -74,6 +75,18 @@ func scrape(pg playwright.Page) {
 		fmt.Printf("%d: %s\n", i+1, title)
 	}
 }
+func waitForPageLoad(pg playwright.Page) {
+	start := time.Now()
+	p := message.NewPrinter(message.MatchLanguage("en"))
+	p.Printf("%s: Waiting for page to load... ", start.Format("15:04:05.000000"))
+
+	if _, err := pg.Goto("https://news.ycombinator.com"); err != nil {
+		log.Fatalf("could not goto: %v", err)
+	}
+	pg.WaitForLoadState("load")
+
+	p.Printf("Page loaded in: %d milliseconds\n", time.Now().Sub(start).Milliseconds())
+}
 
 func screenshot(pg playwright.Page) {
 	ss, err := pg.Screenshot()
@@ -81,7 +94,8 @@ func screenshot(pg playwright.Page) {
 		log.Printf("screenshot error: %v", err)
 	}
 
-	ioutil.WriteFile("screenshot.png", ss, 0644)
+	const SCREENSHOT_FILE = "/h/Downloads/screenshot.png"
+	ioutil.WriteFile(SCREENSHOT_FILE, ss, 0644)
 }
 
 func clsBrowser(browser playwright.Browser) {
