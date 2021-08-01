@@ -80,6 +80,8 @@ func waitForPageLoad(pg playwright.Page) {
 	p := message.NewPrinter(message.MatchLanguage("en"))
 	p.Printf("%s: Waiting for page to load... ", start.Format("15:04:05.000000"))
 
+	// Page has lots of useful methods.
+	// See: https://pkg.go.dev/github.com/mxschmitt/playwright-go#Page
 	if _, err := pg.Goto("https://news.ycombinator.com"); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
