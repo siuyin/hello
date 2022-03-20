@@ -1,6 +1,6 @@
 module github.com/siuyin/hello
 
-go 1.13
+go 1.18
 
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0
