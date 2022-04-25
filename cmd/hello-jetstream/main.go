@@ -20,7 +20,7 @@ func main() {
 	replayMsgs("LOGGER")
 	pubAsyncMsgs(54)
 	syncPubMsgs(33)
-	//consume("MONITOR")
+	consume("MONITOR")
 }
 
 func init() {
@@ -79,6 +79,7 @@ func consume(consumer string) {
 		}
 		for i := 0; i < len(msgs); i++ {
 			fmt.Printf("%s\n", msgs[i].Data)
+			msgs[i].Ack()
 		}
 	}
 }

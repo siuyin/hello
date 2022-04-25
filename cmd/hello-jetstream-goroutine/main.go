@@ -19,6 +19,7 @@ func main() {
 	streamCreate()
 	clockDisp()
 	ticker()
+	tickAudit()
 
 	select {} // wait forever
 }
@@ -63,6 +64,28 @@ func ticker() {
 		for {
 			js.Publish("TIME.tick", []byte(fmt.Sprintf("%s", time.Now())))
 			time.Sleep(time.Second)
+		}
+	}()
+}
+
+func tickAudit() {
+	go func() {
+		sub, err := js.PullSubscribe("TIME.tick", "tickauditor")
+		if err != nil {
+			log.Fatal("pullsub: ", err)
+		}
+
+		for {
+			for msgs, err := sub.Fetch(100, nats.MaxWait(1*time.Second)); len(msgs) > 0 && err == nil; msgs, err = sub.Fetch(100, nats.MaxWait(1*time.Second)) {
+				//fmt.Println("fetching ", len(msgs), " messages")
+				if err != nil {
+					log.Fatal("fetch: ", err)
+				}
+				for i := 0; i < len(msgs); i++ {
+					fmt.Printf("audit: %s\n", msgs[i].Data)
+					msgs[i].Ack()
+				}
+			}
 		}
 	}()
 }
