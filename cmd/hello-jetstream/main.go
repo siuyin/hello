@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -72,16 +73,28 @@ func consume(consumer string) {
 		log.Fatal("pullsub: ", err)
 	}
 
-	for msgs, err := sub.Fetch(100, nats.MaxWait(1*time.Second)); len(msgs) > 0 && err == nil; msgs, err = sub.Fetch(100, nats.MaxWait(1*time.Second)) {
-		fmt.Println("fetching ", len(msgs), " messages")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("all done, please ignore the context deadline exceeded message")
+			return
+		default:
+		}
+
+		msgs, err := sub.Fetch(100, nats.Context(ctx))
 		if err != nil {
 			log.Fatal("fetch: ", err)
 		}
-		for i := 0; i < len(msgs); i++ {
-			fmt.Printf("%s\n", msgs[i].Data)
-			msgs[i].Ack()
+		fmt.Println("fetching ", len(msgs), " messages")
+		for _, msg := range msgs {
+			fmt.Printf("%s\n", msg.Data)
+			msg.Ack()
 		}
 	}
+
 }
 
 func replayMsgs(consumer string) {
