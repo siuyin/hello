@@ -8,41 +8,65 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
+var (
+	nc *nats.Conn
+	js nats.JetStreamContext
+
+	err error
+)
+
 func main() {
-	nc, err := nats.Connect("localhost")
+	streamCreate()
+	pubAsyncMsgs(54)
+	syncPubMsgs(33)
+	consume("MONITOR")
+}
+
+func init() {
+	nc, err = nats.Connect("localhost")
 	if err != nil {
 		log.Fatal("connect: ", err)
 	}
 
-	js, err := nc.JetStream()
+	js, err = nc.JetStream()
 	if err != nil {
 		log.Fatal("jetstream: ", err)
 	}
+}
 
-	// Create a Stream
-	js.AddStream(&nats.StreamConfig{
+func streamCreate() {
+	_, err = js.AddStream(&nats.StreamConfig{
 		Name:     "ORDERS",
 		Subjects: []string{"ORDERS.*"},
 	})
-
-	// Simple Async Stream Publisher
-	for i := 0; i < 504; i++ {
-		js.PublishAsync("ORDERS.scratch", []byte(fmt.Sprintf("hello: %v", i)))
+	if err != nil {
+		log.Fatal("streamcreate: ", err)
 	}
-	//select {
-	//case <-js.PublishAsyncComplete():
-	//	fmt.Println("Done")
-	//case <-time.After(5 * time.Second):
-	//	fmt.Println("Did not resolve in time")
-	//}
-	<-js.PublishAsyncComplete()
+}
 
-	for i := 0; i < 303; i++ {
+func pubAsyncMsgs(n int) {
+	go func() {
+		for i := 0; i < n; i++ {
+			js.PublishAsync("ORDERS.scratch", []byte(fmt.Sprintf("hello: %v", i)))
+		}
+		//select {
+		//case <-js.PublishAsyncComplete():
+		//	fmt.Println("Done")
+		//case <-time.After(5 * time.Second):
+		//	fmt.Println("Did not resolve in time")
+		//}
+		<-js.PublishAsyncComplete()
+	}()
+}
+
+func syncPubMsgs(n int) {
+	for i := 0; i < n; i++ {
 		js.Publish("ORDERS.sync", []byte(fmt.Sprintf("sync: %v", i)))
 	}
+}
 
-	// Simple Pull Consumer
-	sub, err := js.PullSubscribe("ORDERS.*", "MONITOR")
+func consume(consumer string) {
+	sub, err := js.PullSubscribe("ORDERS.*", consumer)
 	if err != nil {
 		log.Fatal("pullsub: ", err)
 	}
