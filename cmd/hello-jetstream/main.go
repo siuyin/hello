@@ -17,9 +17,10 @@ var (
 
 func main() {
 	streamCreate()
+	replayMsgs("LOGGER")
 	pubAsyncMsgs(54)
 	syncPubMsgs(33)
-	consume("MONITOR")
+	//consume("MONITOR")
 }
 
 func init() {
@@ -80,4 +81,17 @@ func consume(consumer string) {
 			fmt.Printf("%s\n", msgs[i].Data)
 		}
 	}
+}
+
+func replayMsgs(consumer string) {
+	go func() {
+		_, err := js.Subscribe("ORDERS.>", func(m *nats.Msg) {
+			fmt.Printf("%s\n", m.Data)
+		}, nats.Durable(consumer), nats.DeliverAll())
+		if err != nil {
+			log.Fatal("replaymsgs: ", err)
+		}
+
+		select {} // wait forever
+	}()
 }
