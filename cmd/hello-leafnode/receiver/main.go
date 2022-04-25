@@ -43,7 +43,7 @@ func streamCreate() {
 }
 
 func receiver() {
-	sub, err := js.PullSubscribe("posts.*", "clockdisp")
+	sub, err := js.PullSubscribe("posts.*", "clockdisp", nats.Bind("posts", "clockdisp"))
 	if err != nil {
 		log.Fatal("pullsub: ", err)
 	}
