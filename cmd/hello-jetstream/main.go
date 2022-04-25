@@ -77,9 +77,9 @@ func consume(consumer string) {
 		if err != nil {
 			log.Fatal("fetch: ", err)
 		}
-		for i := 0; i < len(msgs); i++ {
-			fmt.Printf("%s\n", msgs[i].Data)
-			msgs[i].Ack()
+		for _, msg := range msgs {
+			fmt.Printf("%s\n", msg.Data)
+			msg.Ack()
 		}
 	}
 }
