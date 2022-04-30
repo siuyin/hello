@@ -11,6 +11,7 @@ require (
 	github.com/nats-io/nuid v1.0.1
 	github.com/nats-io/stan.go v0.10.2
 	github.com/open-policy-agent/opa v0.20.5
+	github.com/sirupsen/logrus v1.4.1
 	github.com/siuyin/dflt v0.0.0-20190616123008-ea16caf9b8ef
 	go.opencensus.io v0.22.1
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
@@ -29,6 +30,7 @@ require (
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.9.4 // indirect
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/nats-io/nats-server/v2 v2.8.1 // indirect
 	github.com/nats-io/nats-streaming-server v0.24.5 // indirect
