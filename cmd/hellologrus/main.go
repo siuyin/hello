@@ -6,7 +6,10 @@ import (
 
 func main() {
 	//log.SetLevel(log.TraceLevel)
+
 	log.Println("Gerbau")
+
+	//log.SetFormatter(&log.JSONFormatter{})
 	log.WithFields(log.Fields{"mod": "main"}).Info("log R us")
 
 	params := []string{"brown", "fox", "lazy", "dog"}
