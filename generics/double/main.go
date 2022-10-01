@@ -2,6 +2,10 @@ package main
 
 import "fmt"
 
+type number interface {
+	int | float32 | float64
+}
+
 func main() {
 	fmt.Println("generic double function")
 	fmt.Println(double[int](2))
@@ -11,11 +15,15 @@ func main() {
 
 	invA := inventory[int]{"itemA", 2}
 	fmt.Println(invA.double()) // but this works
+	invB := inventory[float32]{"itemA", 3.0}
+	fmt.Println(invB.double())
+	// but not this
+	//invC := inventory[number]{"itemA", 4.0}
 
 }
 
 // I got stuck here as here is no way to overload the + operator in Go.
-type inventory[T int | float64] struct {
+type inventory[T number] struct {
 	sku   string
 	count T
 }
