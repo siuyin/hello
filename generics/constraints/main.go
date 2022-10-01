@@ -15,9 +15,10 @@ func main() {
 	fmt.Println(min(3.2, 2.1))
 	fmt.Println(min(3, 2))
 
-	a := inventory[string]{"abc", "good", 3}
-	b := inventory[string]{"def", "bad", 4}
-	fmt.Println(invMin(a, b))
+	a := inventory[string, uint]{"abc", "good", 3}
+	b := inventory[string, uint]{"def", "bad", 4}
+	fmt.Println(invSKUMin(a, b))
+	fmt.Println(a.qtyMax(b))
 
 }
 
@@ -28,15 +29,26 @@ func min[T constraints.Ordered](x, y T) T {
 	return y
 }
 
-type inventory[T constraints.Ordered] struct {
+type inventory[T constraints.Ordered, N constraints.Unsigned] struct {
 	sku    T
 	rating T
-	qty    int
+	qty    N
 }
 
-func invMin[T constraints.Ordered](a, b inventory[T]) inventory[T] {
+func invSKUMin[T constraints.Ordered, N constraints.Unsigned](a, b inventory[T, N]) inventory[T, N] {
 	if a.sku < b.sku {
 		return a
 	}
 	return b
+}
+
+func (i inventory[T, N]) qtyMax(b inventory[T, N]) inventory[T, N] {
+	if i.qty < b.qty {
+		return b
+	}
+	return i
+}
+
+func (i inventory[T, N]) String() string {
+	return fmt.Sprintf("sku: %v, rating: %v, qty: %v", i.sku, i.rating, i.qty)
 }
