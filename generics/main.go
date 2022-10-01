@@ -29,7 +29,8 @@ func main() {
 	fmt.Printf("2x area of square: %v\n", area2x(sq1))
 	fmt.Printf("2x area of circle: %v\n", area2x(c1))
 
-	//fmt.Printf("generic area: %v\n", areaGeneric(c1))
+	sq2 := square2[int]{2}
+	fmt.Printf("generic area: %v\n", areaGeneric(sq2))
 
 }
 
@@ -66,7 +67,15 @@ func area2x(a areaer) float64 {
 	return 2.0 * a.area()
 }
 
-func areaGeneric[S square | circ, V number](S) V {
-	//return S.area()
-	return 2.0
+type square2[T number] struct {
+	r T
+}
+
+func (s square2[T]) area() T {
+	return s.r * s.r
+}
+
+func areaGeneric[S square2[number], V number](s S) V {
+	return s.area()
+	//return 2.0
 }
