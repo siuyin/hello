@@ -17,6 +17,8 @@ func main() {
 	fmt.Println(invA.double()) // but this works
 	invB := inventory[float32]{"itemA", 3.0}
 	fmt.Println(invB.double())
+	//fmt.Println(inventory{"itemA", 4.0}) // type of 4.0 should be inferred by Go but is not
+
 	// but not this
 	//invC := inventory[number]{"itemA", 4.0}
 
