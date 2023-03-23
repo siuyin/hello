@@ -19,6 +19,8 @@ func main() {
 	sub(js, "foo.a", "A")
 	sub(js, "foo.a", "B")
 
+	watch(js, "mykv", "a")
+
 	select {} // wait forever
 }
 
@@ -67,5 +69,28 @@ func sub(js nats.JetStreamContext, subj string, name string) {
 		log.Println("Created consumer:", name+"Consumer")
 
 		select {}
+	}()
+}
+
+func watch(js nats.JetStreamContext, bkt string, key string) {
+	go func() {
+		kv, err := js.KeyValue(bkt)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		watcher, err := kv.Watch(key)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer watcher.Stop()
+
+		for {
+			e := <-watcher.Updates()
+			if e != nil { // Updates can return nil!
+				fmt.Printf("value received: %s\n", e.Value())
+			}
+		}
+
 	}()
 }
