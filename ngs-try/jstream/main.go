@@ -16,7 +16,8 @@ func main() {
 	js := createStream(nc, "foo")
 
 	pub(js, "foo.a")
-	sub(js, "foo.a")
+	sub(js, "foo.a", "A")
+	sub(js, "foo.a", "B")
 
 	select {} // wait forever
 }
@@ -40,8 +41,8 @@ func createStream(nc *nats.Conn, name string) nats.JetStreamContext {
 	}
 
 	if _, err := js.AddStream(&nats.StreamConfig{Name: "foo",
-		Subjects: []string{"foo.>"}, MaxBytes: 10000000,
-		Retention: nats.WorkQueuePolicy}); err != nil {
+		Subjects: []string{"foo.>"}, MaxBytes: 1000,
+		Retention: nats.LimitsPolicy}); err != nil {
 		log.Fatal(err)
 	}
 
@@ -57,11 +58,14 @@ func pub(js nats.JetStreamContext, subj string) {
 	}()
 }
 
-func sub(js nats.JetStreamContext, subj string) {
+func sub(js nats.JetStreamContext, subj string, name string) {
 	go func() {
 		js.Subscribe(subj, func(msg *nats.Msg) {
-			fmt.Printf("%s\n", msg.Data)
-		}, nats.Durable("fooAConsumer"))
+			fmt.Printf("%s: %s\n", name, msg.Data)
+		}, nats.Durable(name+"Consumer"))
+
+		log.Println("Created consumer:", name+"Consumer")
+
 		select {}
 	}()
 }
