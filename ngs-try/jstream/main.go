@@ -71,8 +71,27 @@ func sub(js nats.JetStreamContext, subj string, name string) {
 		select {}
 	}()
 }
-
+func kvBktExists(js nats.JetStreamContext, bkt string) bool {
+	_, err := js.KeyValue(bkt)
+	if err == nats.ErrBucketNotFound {
+		return false
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	return true
+}
+func kvinit(js nats.JetStreamContext, bkt string) {
+	if !kvBktExists(js, bkt) {
+		_, err := js.CreateKeyValue(&nats.KeyValueConfig{Bucket: bkt, MaxBytes: 10000})
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+}
 func watch(js nats.JetStreamContext, bkt string, key string) {
+	kvinit(js, bkt)
 	go func() {
 		kv, err := js.KeyValue(bkt)
 		if err != nil {
