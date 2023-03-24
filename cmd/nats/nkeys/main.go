@@ -10,11 +10,13 @@ import (
 
 func main() {
 	fmt.Println("NATS keys")
-	//user, err := nkeys.CreateUser()
-	user, err := nkeys.CreateAccount()
+	user, err := nkeys.CreateUser()
+	//user, err := nkeys.CreateAccount()
 	if err != nil {
 		log.Fatal("1 ", err)
 	}
+	pk, _ := user.PublicKey()
+	fmt.Printf("public key: %s\n", pk)
 
 	challenge := nuid.Next()
 	fmt.Println(challenge)
