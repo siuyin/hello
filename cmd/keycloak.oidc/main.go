@@ -20,6 +20,8 @@ func main() {
 	}
 	fmt.Printf("provider endpoint: %#v\n", provider.Endpoint())
 
+	fmt.Println("------------------")
+
 	oauth2Config := oauth2.Config{
 		ClientID:    "golang",
 		RedirectURL: "http://192.168.93.15:32798/",
