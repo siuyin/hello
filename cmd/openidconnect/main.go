@@ -7,7 +7,6 @@ import (
 	"html"
 	"log"
 	"net/http"
-	"net/url"
 
 	"github.com/coreos/go-oidc"
 	"github.com/siuyin/dflt"
@@ -54,7 +53,9 @@ func main() {
 	// logout handler
 	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r,
-			fmt.Sprintf("%s?redirect_uri=%s", pm.EndSessionEndpoint, url.QueryEscape("http://localhost:8080/")),
+			//fmt.Sprintf("%s?redirect_uri=%s", pm.EndSessionEndpoint, url.QueryEscape("http://localhost:8082/")), // no-longer supported: see https://www.keycloak.org/docs/latest/upgrading/index.html#openid-connect-logout
+			//fmt.Sprintf("%s?post_logout_redirect_uri=%s&client_id=goclient", pm.EndSessionEndpoint, url.QueryEscape("http://localhost:8082/")),
+			pm.EndSessionEndpoint,
 			http.StatusFound)
 	})
 
@@ -67,7 +68,7 @@ func main() {
 
 	// start serving
 	log.Println("Starting http server.")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8082", nil))
 	//log.Fatal(http.ListenAndServeTLS(":8080", "/h/certbot/rasp.beyondbroadcast.com/fullchain.pem",
 	//	"/h/certbot/rasp.beyondbroadcast.com/privkey.pem", nil))
 }
