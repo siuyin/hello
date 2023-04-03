@@ -7,7 +7,7 @@ require (
 	github.com/coreos/go-oidc v2.1.0+incompatible
 	github.com/mxschmitt/playwright-go v0.1100.0
 	github.com/nats-io/nats.go v1.14.0
-	github.com/nats-io/nkeys v0.3.0
+	github.com/nats-io/nkeys v0.4.4
 	github.com/nats-io/nuid v1.0.1
 	github.com/nats-io/stan.go v0.10.2
 	github.com/open-policy-agent/opa v0.51.0
@@ -127,7 +127,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	go.uber.org/automaxprocs v1.5.2 // indirect
-	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
+	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/exp v0.0.0-20220930202632-ec3f01382ef9 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
