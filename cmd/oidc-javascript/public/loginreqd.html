@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>OIDC Demo</title>
+    <style>
+      .hidden { display: none; }
+    </style>
+    <script src="http://localhost:8081/js/keycloak.js"></script>
+    <script>
+      async function initKeycloak() {
+        const keycloak = await new Keycloak();
+        try {
+          await keycloak.init({
+            checkLoginIframe: false,
+            onLoad: 'login-required'
+          });
+        } catch(err) {
+          console.log(err);
+        }
+
+        updateLogoutLink();
+        showAdminContent();
+        showToken();
+				keycloak.updateToken(30).then(function() {
+						loadData();
+				}).catch(function(err) {
+						console.log(err);
+				});
+
+        async function updateLogoutLink() {
+          let logoutLink = document.getElementById("logout");
+          logoutLink.setAttribute("href",keycloak.createLogoutUrl({redirectUri:"http://localhost:8080/"}));
+          keycloak.authenticated?logoutLink.classList.remove("hidden"):logoutLink.classList.add("hidden");
+          if (keycloak.authenticated) {
+            const prof = await keycloak.loadUserProfile();
+            logoutLink.innerHTML=`logout: ${prof.username}`;
+          }
+        }
+
+        function showAdminContent() {
+          const ac = document.getElementById("adminContent");
+          if (keycloak.hasRealmRole("admin")) {
+            ac.classList.remove("hidden");
+            return
+          }
+          ac.classList.add("hidden");
+        }
+
+        function showToken() {
+          const tk = document.getElementById("token");
+          tk.innerHTML = "access token:\n" + JSON.stringify(keycloak.tokenParsed,null,2) +
+  "\n\nrefresh token:\n"+JSON.stringify(keycloak.refreshTokenParsed,null,2);
+        }
+
+				function loadData() {
+					console.log(`loading data with refreshed token: ${keycloak.token}`);
+        }
+      }
+    </script>
+  </head>
+  <body onload="initKeycloak()">
+    <a href="/">home</a>
+    <a id="logout" href="#">logout</a>
+    <h1>Hello World</h1>
+    <p>This page is protected and requires a valid login to view.
+    <p>If you see this content you have successfully logged in.
+
+    <pre id="token"></pre>
+    <p id="adminContent" class="hidden">This is visible only by admins.</p>
+  </body>
+</html>

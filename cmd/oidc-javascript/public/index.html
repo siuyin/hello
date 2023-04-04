@@ -1,37 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8">
     <title>OIDC Demo</title>
-    <script src="http://localhost:31173/auth/js/keycloak.js"></script>
-    <script>
-      var keycloak = new Keycloak();
-
-      keycloak.init({'onLoad': 'login-required'})
-      .then(function() {
-        let logoutLink = document.getElementById("logout");
-        logoutLink.setAttribute("href",keycloak.createLogoutUrl({'redirectUri':'http://localhost:8080/'}));
-        logoutLink.innerText = `logout: ${keycloak.idTokenParsed.name}`;
-      })
-
-      .then(function() {
-        setInterval(function() {
-          keycloak.updateToken(30).catch(function() {alert('failed to refresh token')});
-        },1000);
-      })
-
-      .then(function() {
-        console.log(keycloak.realmAccess.roles);
-      })
-
-      .catch(function() {
-          alert('failed to initialize');
-      });
-    </script>
+    <style>
+      .hidden { display: none; }
+    </style>
   </head>
   <body>
-    <a id="logout" href="#">logout</a>
-    <h1>Hello World</h1>
-    <p>This page is protected and requires a valid login to view.
-    <p>If you see this content you have successfully logged in.
+    <h1>OpenID Connect with Keycloak</h1>
+    <p>This page is public.</p>
+    <p>To access the following link, you need to <a href="/loginreqd.html">login</a>.
   </body>
 </html>
