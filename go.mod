@@ -12,7 +12,7 @@ require (
 	github.com/nats-io/stan.go v0.10.2
 	github.com/open-policy-agent/opa v0.51.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/siuyin/dflt v0.0.0-20190616123008-ea16caf9b8ef
+	github.com/siuyin/dflt v0.0.0-20230329062002-0475f4d54412
 	go.opencensus.io v0.23.0
 	golang.org/x/oauth2 v0.4.0
 	golang.org/x/text v0.8.0

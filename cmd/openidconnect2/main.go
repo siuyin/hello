@@ -37,7 +37,7 @@ func main() {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  "http://localhost:8082/auth/callback",
+		RedirectURL:  dflt.EnvString("REDIRECT_URL", "http://localhost:8080/auth/callback"),
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 
@@ -66,7 +66,8 @@ func main() {
 
 	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
 		// the logout url below was obtained from provider.Claims
-		http.Redirect(w, r, "http://localhost:8081/realms/myrealm/protocol/openid-connect/logout", http.StatusFound)
+		http.Redirect(w, r,
+			dflt.EnvString("LOGOUT_URL", "http://localhost:8081/realms/junk/protocol/openid-connect/logout"), http.StatusFound)
 	})
 
 	http.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
@@ -123,10 +124,15 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		fmt.Fprintf(w, `<div><a href="/">Home</a></div>`)
+
+		fmt.Fprintf(w, "<pre>")
 		w.Write(data)
+		fmt.Fprintf(w, "</pre>")
 	})
 
-	log.Fatal(http.ListenAndServe(":8082", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", dflt.EnvIntMust("PORT", 8080)), nil))
 }
 
 func setCallbackCookie(w http.ResponseWriter, r *http.Request, name, value string) {
