@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/coreos/go-oidc"
@@ -19,6 +20,7 @@ import (
 var (
 	clientID     = dflt.EnvString("CLIENT_ID", "goclient")
 	clientSecret = dflt.EnvString("CLIENT_SECRET", "your secret here")
+	rawIDToken   string // FIXME: used for logout. This implementation is not multi-user!
 )
 
 func main() {
@@ -66,8 +68,13 @@ func main() {
 
 	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
 		// the logout url below was obtained from provider.Claims
+		v := url.Values{}
+		v.Add("post_logout_redirect_uri", "http://localhost:8080/")
+		v.Add("id_token_hint", rawIDToken)
+		enc := v.Encode()
+		fmt.Println(enc)
 		http.Redirect(w, r,
-			dflt.EnvString("LOGOUT_URL", "http://localhost:8081/realms/junk/protocol/openid-connect/logout"), http.StatusFound)
+			dflt.EnvString("LOGOUT_URL", "http://localhost:8081/realms/junk/protocol/openid-connect/logout"+"?"+enc), http.StatusFound)
 	})
 
 	http.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +95,8 @@ func main() {
 			return
 		}
 
-		rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+		var ok bool
+		rawIDToken, ok = oauth2Token.Extra("id_token").(string)
 		if !ok {
 			http.Error(w, "No id_token field in oauth2 token.", http.StatusInternalServerError)
 			return
