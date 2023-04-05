@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/coreos/go-oidc"
@@ -20,7 +19,16 @@ import (
 var (
 	clientID     = dflt.EnvString("CLIENT_ID", "goclient")
 	clientSecret = dflt.EnvString("CLIENT_SECRET", "your secret here")
-	rawIDToken   string // FIXME: used for logout. This implementation is not multi-user!
+	nav          = `<a href="/login" style="display: block">Login (will request credentials if not already logged in)</a>
+<a id="logout" href="http://localhost:8081/realms/junk/protocol/openid-connect/logout" style="display: block">Logout</a>
+<script>
+	const logout=document.getElementById("logout");
+	const idtoken=sessionStorage.getItem("idtoken");
+	const logoutURI="http://localhost:8081/realms/junk/protocol/openid-connect/logout?post_logout_redirect_uri="
+	+ encodeURIComponent("http://localhost:8080/")
+	+ "&id_token_hint="+idtoken;
+	logout.setAttribute("href",logoutURI);
+</script>`
 )
 
 func main() {
@@ -44,8 +52,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `<h1>OpenID Connect</h1> <a href="/login">Login</a>
-<a href="/logout">Logout</a>`)
+		fmt.Fprintf(w, `<h1>OpenID Connect</h1>`+nav)
 	})
 
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -66,17 +73,6 @@ func main() {
 		http.Redirect(w, r, config.AuthCodeURL(state, oidc.Nonce(nonce)), http.StatusFound)
 	})
 
-	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
-		// the logout url below was obtained from provider.Claims
-		v := url.Values{}
-		v.Add("post_logout_redirect_uri", "http://localhost:8080/")
-		v.Add("id_token_hint", rawIDToken)
-		enc := v.Encode()
-		fmt.Println(enc)
-		http.Redirect(w, r,
-			dflt.EnvString("LOGOUT_URL", "http://localhost:8081/realms/junk/protocol/openid-connect/logout"+"?"+enc), http.StatusFound)
-	})
-
 	http.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
 		state, err := r.Cookie("state")
 		if err != nil {
@@ -95,8 +91,7 @@ func main() {
 			return
 		}
 
-		var ok bool
-		rawIDToken, ok = oauth2Token.Extra("id_token").(string)
+		rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 		if !ok {
 			http.Error(w, "No id_token field in oauth2 token.", http.StatusInternalServerError)
 			return
@@ -134,10 +129,13 @@ func main() {
 		}
 
 		fmt.Fprintf(w, `<div><a href="/">Home</a></div>`)
-
+		fmt.Fprintf(w, nav)
 		fmt.Fprintf(w, "<pre>")
 		w.Write(data)
 		fmt.Fprintf(w, "</pre>")
+		fmt.Fprintf(w, `<script>
+sessionStorage.setItem("idtoken","%s")
+</script>`, rawIDToken)
 	})
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", dflt.EnvIntMust("PORT", 8080)), nil))
