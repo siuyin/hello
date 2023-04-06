@@ -3,7 +3,7 @@ module pricing
 go 1.19
 
 require (
-	github.com/docker/docker v20.10.24+incompatible // indirect
+	github.com/docker/docker v23.0.3+incompatible // indirect
 	github.com/klauspost/compress v1.16.0 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/nats-io/jwt/v2 v2.3.0 // indirect
