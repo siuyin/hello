@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"pricing/db"
+
+	"github.com/siuyin/hello/opa-pricing-app/db"
 )
 
 func main() {
