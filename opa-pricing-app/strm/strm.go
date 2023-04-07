@@ -1,4 +1,5 @@
-package db
+// Package strm provide high level nats jetstream functions.
+package strm
 
 import (
 	"encoding/csv"
@@ -14,34 +15,53 @@ import (
 	"github.com/siuyin/dflt"
 )
 
-type Rec struct {
+// PriceRec is a pricing key-value database record.
+type PriceRec struct {
 	SKU         string
 	Description string
 	Price       float64
 }
 
-type DB struct {
+// Server encapsulates an embedded nats jetstream server.
+type Server struct {
 	svr *server.Server
 	nc  *nats.Conn
 	js  nats.JetStreamContext
-	kv  nats.KeyValue
 }
 
-// Init sets up a pricing database.
-func Init(name string) *DB {
+// DB is a pricing key-value database.
+type DB struct {
+	kv nats.KeyValue
+}
+
+var s *Server
+
+func svrInit() *Server {
 	host := dflt.EnvString("NATS_HOST", "localhost")
+	s = &Server{}
+	s.svr = newEmbeddedNATSServer(host)
+	s.nc = newNATSConn(host)
+	s.js = newJetStream(s.nc)
+	return s
+}
+
+// DBInit sets up a pricing database.
+func DBInit(name string) *DB {
+	if s == nil {
+		s = svrInit()
+	}
+
 	db := &DB{}
-	db.svr = newEmbeddedNATSServer(host)
-	db.nc = newNATSConn(host)
-	db.js = newJetStream(db.nc)
-	db.kv = newKeyValueStore(db.js, name)
+	db.kv = newKeyValueStore(s.js, name)
 	return db
 }
 
+// Close closes the pricing database.
 func (db *DB) Close() {
-	db.nc.Close()
+	s.nc.Close()
 }
 
+// Load loads a csv data stream into the pricing database.
 func (db *DB) Load(r io.Reader) error {
 	cr := csv.NewReader(r)
 	firstRec := true
@@ -55,7 +75,7 @@ func (db *DB) Load(r io.Reader) error {
 		if err != nil {
 			return fmt.Errorf("%v: price field does not contain a number", rec)
 		}
-		val := Rec{SKU: rec[0], Description: rec[1], Price: price}
+		val := PriceRec{SKU: rec[0], Description: rec[1], Price: price}
 		b, err := json.Marshal(val)
 		if err != nil {
 			return fmt.Errorf("error marshaling %v: %v", val, err)
@@ -67,23 +87,28 @@ func (db *DB) Load(r io.Reader) error {
 	return nil
 }
 
+// Dump exports the pricing database records into a csv stream.
 func (db *DB) Dump(w io.Writer) error {
 	keys, err := db.kv.Keys()
 	if err != nil {
-		log.Println("Unable to list keys:", err)
+		return fmt.Errorf("Unable to list keys: %v", err)
 	}
 	cw := csv.NewWriter(w)
-	cw.Write([]string{"SKU", "Description", "Price"})
+	if err := cw.Write([]string{"SKU", "Description", "Price"}); err != nil {
+		return fmt.Errorf("unable to write csv header: %v", err)
+	}
 	for i := 0; i < len(keys); i++ {
 		v, err := db.kv.Get(keys[i])
 		if err != nil {
 			return fmt.Errorf("Unable to get key: %v: %v", keys[i], err)
 		}
-		rec := Rec{}
+		rec := PriceRec{}
 		if err := json.Unmarshal(v.Value(), &rec); err != nil {
 			return fmt.Errorf("Unmarshal of %q failed: %v", string(v.Value()), err)
 		}
-		cw.Write([]string{rec.SKU, rec.Description, fmt.Sprintf("%.2f", rec.Price)})
+		if err := cw.Write([]string{rec.SKU, rec.Description, fmt.Sprintf("%.2f", rec.Price)}); err != nil {
+			return fmt.Errorf("unable to write csv record: %#v: %v", rec, err)
+		}
 	}
 	cw.Flush()
 

@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/siuyin/hello/opa-pricing-app/db"
+	"github.com/siuyin/hello/opa-pricing-app/strm"
 )
 
 func main() {
-	db := db.Init("pricing")
+	db := strm.DBInit("pricing")
 	defer db.Close()
 
 	fmt.Println("initialised")

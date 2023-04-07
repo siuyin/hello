@@ -1,4 +1,4 @@
-package db
+package strm
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 func TestDBFunctions(t *testing.T) {
 	bucketName := nuid.Next()
-	db := Init(bucketName)
+	db := DBInit(bucketName)
 
 	t.Run("put and get", func(t *testing.T) {
 		if _, err := db.kv.PutString("a", "apple"); err != nil {
@@ -48,7 +48,7 @@ func TestDBFunctions(t *testing.T) {
 		}
 
 	})
-	if err := db.js.DeleteKeyValue(bucketName); err != nil {
+	if err := s.js.DeleteKeyValue(bucketName); err != nil {
 		t.Error(err)
 	}
 	db.Close()
