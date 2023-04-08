@@ -1,4 +1,4 @@
-package strm
+package db
 
 import (
 	"bytes"
@@ -11,16 +11,16 @@ import (
 
 func TestDBFunctions(t *testing.T) {
 	bucketName := nuid.Next()
-	db := DBInit(bucketName)
+	db := Init(bucketName)
 
 	t.Run("put and get", func(t *testing.T) {
-		if _, err := db.kv.PutString("a", "apple"); err != nil {
+		if _, err := db.Put("a", []byte("apple")); err != nil {
 			t.Error(err)
 		}
-		if v, err := db.kv.Get("a"); string(v.Value()) != "apple" || err != nil {
+		if v, err := db.Get("a"); string(v.Value()) != "apple" || err != nil {
 			t.Errorf("unable to get key 'a':  %v", err)
 		}
-		if err := db.kv.Delete("a"); err != nil {
+		if err := db.Delete("a"); err != nil {
 			t.Error(err)
 		}
 	})
@@ -48,7 +48,7 @@ func TestDBFunctions(t *testing.T) {
 		}
 
 	})
-	if err := s.js.DeleteKeyValue(bucketName); err != nil {
+	if err := db.s.Delete(bucketName); err != nil {
 		t.Error(err)
 	}
 	db.Close()

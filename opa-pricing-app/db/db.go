@@ -1,18 +1,15 @@
 // Package strm provide high level nats jetstream functions.
-package strm
+package db
 
 import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"strconv"
-	"time"
 
-	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
-	"github.com/siuyin/dflt"
+	"github.com/siuyin/strm"
 )
 
 // PriceRec is a pricing key-value database record.
@@ -21,44 +18,30 @@ type PriceRec struct {
 	Description string
 	Price       float64
 }
-
-// Server encapsulates an embedded nats jetstream server.
-type Server struct {
-	svr *server.Server
-	nc  *nats.Conn
-	js  nats.JetStreamContext
-}
-
-// DB is a pricing key-value database.
 type DB struct {
-	kv nats.KeyValue
+	s *strm.DB
 }
 
-var s *Server
-
-func svrInit() *Server {
-	host := dflt.EnvString("NATS_HOST", "localhost")
-	s = &Server{}
-	s.svr = newEmbeddedNATSServer(host)
-	s.nc = newNATSConn(host)
-	s.js = newJetStream(s.nc)
-	return s
+// Init sets up a pricing database.
+func Init(name string) *DB {
+	db := DB{}
+	db.s = strm.DBInit(name)
+	return &db
 }
 
-// DBInit sets up a pricing database.
-func DBInit(name string) *DB {
-	if s == nil {
-		s = svrInit()
-	}
-
-	db := &DB{}
-	db.kv = newKeyValueStore(s.js, name)
-	return db
+// Put stores a value with the specified key.
+func (db *DB) Put(key string, value []byte) (uint64, error) {
+	return db.s.KV.Put(key, value)
 }
 
-// Close closes the pricing database.
-func (db *DB) Close() {
-	s.nc.Close()
+// Get retrieves the value stored at the specified key.
+func (db *DB) Get(key string) (nats.KeyValueEntry, error) {
+	return db.s.KV.Get(key)
+}
+
+// Delete delete the entry at key.
+func (db *DB) Delete(key string) error {
+	return db.s.KV.Delete(key)
 }
 
 // Load loads a csv data stream into the pricing database.
@@ -80,7 +63,7 @@ func (db *DB) Load(r io.Reader) error {
 		if err != nil {
 			return fmt.Errorf("error marshaling %v: %v", val, err)
 		}
-		if _, err := db.kv.Put(rec[0], b); err != nil {
+		if _, err := db.s.KV.Put(rec[0], b); err != nil {
 			return fmt.Errorf("error writing record: %v: %v", rec[0], err)
 		}
 	}
@@ -89,7 +72,7 @@ func (db *DB) Load(r io.Reader) error {
 
 // Dump exports the pricing database records into a csv stream.
 func (db *DB) Dump(w io.Writer) error {
-	keys, err := db.kv.Keys()
+	keys, err := db.s.KV.Keys()
 	if err != nil {
 		return fmt.Errorf("Unable to list keys: %v", err)
 	}
@@ -98,7 +81,7 @@ func (db *DB) Dump(w io.Writer) error {
 		return fmt.Errorf("unable to write csv header: %v", err)
 	}
 	for i := 0; i < len(keys); i++ {
-		v, err := db.kv.Get(keys[i])
+		v, err := db.s.KV.Get(keys[i])
 		if err != nil {
 			return fmt.Errorf("Unable to get key: %v: %v", keys[i], err)
 		}
@@ -115,46 +98,6 @@ func (db *DB) Dump(w io.Writer) error {
 	return nil
 }
 
-func newEmbeddedNATSServer(host string) *server.Server {
-	svr, err := server.NewServer(&server.Options{
-		ServerName: "Pricing",
-		Host:       host,
-		JetStream:  true,
-		StoreDir:   "/tmp/pricing",
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	svr.Start()
-	for {
-		if svr.ReadyForConnections(100 * time.Millisecond) {
-			break
-		}
-	}
-	return svr
-}
-
-func newNATSConn(host string) *nats.Conn {
-	nc, err := nats.Connect(fmt.Sprintf("nats://%s:4222", host))
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nc
-}
-
-func newJetStream(nc *nats.Conn) nats.JetStreamContext {
-	js, err := nc.JetStream()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return js
-}
-
-func newKeyValueStore(js nats.JetStreamContext, name string) nats.KeyValue {
-	kv, err := js.CreateKeyValue(&nats.KeyValueConfig{Bucket: name})
-	if err != nil {
-		log.Fatal(err)
-	}
-	return kv
+func (db *DB) Close() {
+	db.s.Close()
 }
