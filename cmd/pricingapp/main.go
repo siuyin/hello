@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 
@@ -44,13 +45,18 @@ type rocketLaunchParams struct {
 	FlightDirectorNoGo bool
 }
 
+func getRocketLaunchParams() *rocketLaunchParams {
+
+	params := rocketLaunchParams{}
+	params.FuelKg = 95 + rand.Float32()*30
+	params.O2Kg = 195 + rand.Float32()*50
+	params.AvionicsGo = rand.Float32() < 0.8          // 80% chance of Avionics Go
+	params.FlightDirectorNoGo = rand.Float32() < 0.05 // 5% chance of flight director NoGo
+	return &params
+}
 func chkRocketLaunch(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	params := rocketLaunchParams{}
-	params.FuelKg = 115
-	params.O2Kg = 212
-	params.AvionicsGo = true
-	params.FlightDirectorNoGo = true
+	params := getRocketLaunchParams()
 	fmt.Fprintf(w, "rocket launch parameters: %#v\n", params)
 	result, err := opa.Decision(ctx, sdk.DecisionOptions{
 		Path:  "/rocket/launch",
