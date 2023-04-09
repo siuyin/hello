@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/open-policy-agent/opa/sdk"
 )
@@ -27,12 +26,68 @@ func main() {
 
 func webAndBundleInit() {
 	go func() {
+		http.HandleFunc("/rocket/launch", chkRocketLaunch)
+		http.HandleFunc("/example/authz/allow", chkAuthzAllow)
+		http.HandleFunc("/example/authz/award_value", chkAuthzValue)
 		http.Handle("/bundles/", http.StripPrefix("/bundles/", http.FileServer(http.Dir("./bundles"))))
 		http.HandleFunc("/bundles/bundle.tar.gz", bundleTarGz)
 
 		log.Fatal(http.ListenAndServe(":8080", nil))
 	}()
 	log.Println("web and OPA bundle server initializing")
+}
+
+type rocketLaunchParams struct {
+	FuelKg             float32
+	O2Kg               float32
+	AvionicsGo         bool
+	FlightDirectorNoGo bool
+}
+
+func chkRocketLaunch(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	params := rocketLaunchParams{}
+	params.FuelKg = 115
+	params.O2Kg = 212
+	params.AvionicsGo = true
+	params.FlightDirectorNoGo = true
+	fmt.Fprintf(w, "rocket launch parameters: %#v\n", params)
+	result, err := opa.Decision(ctx, sdk.DecisionOptions{
+		Path:  "/rocket/launch",
+		Input: map[string]interface{}{"params": params},
+	})
+	if err != nil {
+		http.Error(w, "could not evaluate policy", http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, "%#v\n", result.Result)
+}
+
+func chkAuthzAllow(w http.ResponseWriter, r *http.Request) {
+	opn := r.FormValue("open")
+	ctx := context.Background()
+	result, err := opa.Decision(ctx, sdk.DecisionOptions{
+		Path:  "/example/authz/allow",
+		Input: map[string]interface{}{"open": opn},
+	})
+	if err != nil {
+		http.Error(w, "could not evaluate policy", http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, "%#v\n", result.Result)
+}
+func chkAuthzValue(w http.ResponseWriter, r *http.Request) {
+	opn := r.FormValue("open")
+	ctx := context.Background()
+	result, err := opa.Decision(ctx, sdk.DecisionOptions{
+		Path:  "/example/authz/award_value",
+		Input: map[string]interface{}{"open": opn},
+	})
+	if err != nil {
+		http.Error(w, "could not evaluate policy", http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, "%#v\n", result.Result)
 }
 
 func bundleTarGz(w http.ResponseWriter, r *http.Request) {
@@ -89,18 +144,8 @@ func opaEvalRun() *sdk.OPA {
 	go func() {
 		ctx := context.Background()
 		defer opa.Stop(ctx)
+		select {}
 
-		for {
-			result, err := opa.Decision(ctx, sdk.DecisionOptions{
-				Path:  "/example/authz/award_value",
-				Input: map[string]interface{}{"open": "sesame"},
-			})
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println(result.Result)
-			time.Sleep(time.Second)
-		}
 	}()
 
 	log.Println("OPA ready")
