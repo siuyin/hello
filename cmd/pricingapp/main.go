@@ -15,17 +15,28 @@ import (
 	"github.com/open-policy-agent/opa/sdk"
 )
 
+var opa *sdk.OPA
+
 func main() {
-	http.Handle("/bundles/", http.StripPrefix("/bundles/", http.FileServer(http.Dir("./bundles"))))
-	http.HandleFunc("/bundles/bundle.tar.gz", bundleTarGz)
+	webAndBundleInit()
 
-	opaTest()
+	opa = opaEvalRun()
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	select {}
+}
+
+func webAndBundleInit() {
+	go func() {
+		http.Handle("/bundles/", http.StripPrefix("/bundles/", http.FileServer(http.Dir("./bundles"))))
+		http.HandleFunc("/bundles/bundle.tar.gz", bundleTarGz)
+
+		log.Fatal(http.ListenAndServe(":8080", nil))
+	}()
+	log.Println("web and OPA bundle server initializing")
 }
 
 func bundleTarGz(w http.ResponseWriter, r *http.Request) {
-	log.Println("downloading bundle")
+	log.Println("OPA downloading bundle")
 	w.Header().Add("Content-Type", "application/gzip")
 
 	zw := gzip.NewWriter(w)
@@ -71,28 +82,12 @@ func bundleTarGz(w http.ResponseWriter, r *http.Request) {
 	})
 
 }
-func opaTest() {
+
+func opaEvalRun() *sdk.OPA {
+	opa := opaInit()
+
 	go func() {
-		config := []byte(`
-services: 
-  acme:
-    url: http://localhost:8080
-bundles:
-  authz:
-    service: acme
-    resource: bundles/bundle.tar.gz
-    polling:
-      min_delay_seconds: 1
-      max_delay_seconds: 5
-decision_logs:
-  console: true
-`)
 		ctx := context.Background()
-		opa, err := sdk.New(ctx, sdk.Options{Config: bytes.NewReader(config)})
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("about to eval")
 		defer opa.Stop(ctx)
 
 		for {
@@ -107,4 +102,32 @@ decision_logs:
 			time.Sleep(time.Second)
 		}
 	}()
+
+	log.Println("OPA ready")
+	return opa
+}
+
+func opaInit() *sdk.OPA {
+	config := []byte(`
+services: 
+  acme:
+    url: http://localhost:8080
+bundles:
+  authz:
+    service: acme
+    resource: bundles/bundle.tar.gz
+    polling:
+      min_delay_seconds: 10
+      max_delay_seconds: 30
+decision_logs:
+  console: true
+`)
+	ctx := context.Background()
+	opa, err := sdk.New(ctx, sdk.Options{
+		Config: bytes.NewReader(config),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return opa
 }
