@@ -49,5 +49,12 @@ test_launch_nogo_with_one_nogo_and_flight_override {
 		with input.params.AvionicsGo as false
 		with input.params.FlightDirectorNoGo as false
 }
+test_launch_nogo_with_one_O2Kg_undefined {
+	not launch with fuelGo as true
+		with input.params.AvionicsGo as true
+}
+test_launch_nogo_with_all_undefined_and_flight_go {
+	not launch with input.params.FlightDirectorNoGo as false
+}
 
 
