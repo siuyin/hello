@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	fmt.Println(world.Greet(), "world!")
+	fmt.Println(world.Greet(), "World!")
 	var n int
 	fmt.Println(n)
 	fmt.Println(sub(3, 2))
