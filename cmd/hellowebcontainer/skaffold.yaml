@@ -1,0 +1,9 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+build:
+  artifacts:
+    # Skaffold will use this as your image name and push it here after building
+    - image: siuyin/junk
+      # We are using Docker as our builder here
+      docker:
+        # Pass the args we want to Docker during build
