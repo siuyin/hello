@@ -10,22 +10,25 @@ import (
 	"github.com/siuyin/dflt"
 )
 
-func main() {
+func openDB() *sql.DB {
 	connStr := dflt.EnvString("POSTGRES_CONN_STR", "postgresql://localhost/mydb?user=siuyin&password=secret")
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
-	fmt.Println("database opened")
+	return db
+}
 
-	ctx := context.Background()
+func ping(ctx context.Context,db *sql.DB) {
+
 	if err := db.PingContext(ctx); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("ping OK")
+}
 
-	rows, err := db.QueryContext(ctx, "SELECT name FROM names order by name asc")
+func query(ctx context.Context, db *sql.DB, qryStr string) {
+	rows, err := db.QueryContext(ctx,qryStr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,5 +44,15 @@ func main() {
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
+}
 
+func main() {
+	db := openDB()
+	defer db.Close()
+	fmt.Println("database opened")
+
+	ctx := context.Background()
+	ping(ctx,db)
+
+	query(ctx, db, "SELECT name FROM names order by name asc")
 }
