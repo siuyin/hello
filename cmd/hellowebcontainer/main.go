@@ -34,8 +34,8 @@ func runWebServer() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		qryStr := "SELECT name FROM names order by name desc"
-		fmt.Fprintf(w,"query: %s\n", qryStr)
+		qryStr := "SELECT name FROM names order by name asc"
+		fmt.Fprintf(w, "query: %s\n", qryStr)
 		rows, err := db.QueryContext(ctx, qryStr)
 		if err != nil {
 			log.Fatal(err)
@@ -47,7 +47,7 @@ func runWebServer() {
 			if err := rows.Scan(&name); err != nil {
 				log.Fatal(err)
 			}
-			fmt.Fprintf(w,"%s\n", name)
+			fmt.Fprintf(w, "%s\n", name)
 		}
 		if err := rows.Err(); err != nil {
 			log.Fatal(err)
