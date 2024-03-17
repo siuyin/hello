@@ -1,0 +1,1 @@
+export POSTGRES_CONN_STR="postgresql://localhost/mydb?user=siuyin&password=secret"
