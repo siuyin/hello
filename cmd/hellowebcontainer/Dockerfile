@@ -1,7 +1,6 @@
 FROM golang:1.22.1 as build
 WORKDIR /src
 COPY . /src/
-RUN ls -l
 RUN CGO_ENABLED=0 go build -o /bin/app ./main.go
 
 
