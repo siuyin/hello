@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/siuyin/dflt"
@@ -15,10 +16,9 @@ func main() {
 	defer db.Close()
 	fmt.Println("database opened")
 
-	ctx := context.Background()
-	ping(ctx, db)
+	ping(db)
 
-	query(ctx, db, "SELECT name FROM names order by name asc")
+	query(db, "SELECT name FROM names order by name asc")
 }
 
 func openDB() *sql.DB {
@@ -30,7 +30,9 @@ func openDB() *sql.DB {
 	return db
 }
 
-func ping(ctx context.Context, db *sql.DB) {
+func ping(db *sql.DB) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
 		log.Fatal(err)
@@ -38,7 +40,11 @@ func ping(ctx context.Context, db *sql.DB) {
 	fmt.Println("ping OK")
 }
 
-func query(ctx context.Context, db *sql.DB, qryStr string) {
+func query(db *sql.DB, qryStr string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	fmt.Printf("query: %s\n", qryStr)
 	rows, err := db.QueryContext(ctx, qryStr)
 	if err != nil {
 		log.Fatal(err)
