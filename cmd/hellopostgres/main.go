@@ -1,3 +1,6 @@
+// This executable connects to a postgres database.
+// It assumes the presence of a names table with a "name" column,
+// queries that table and list the names therein.
 package main
 
 import (
