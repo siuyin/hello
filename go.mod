@@ -6,6 +6,7 @@ require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.0
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/lib/pq v1.10.9
 	github.com/nats-io/nats.go v1.28.0
 	github.com/nats-io/nkeys v0.4.6
 	github.com/nats-io/nuid v1.0.1
@@ -45,7 +46,6 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
-	github.com/lib/pq v1.10.9 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/moby/locker v1.0.1 // indirect
