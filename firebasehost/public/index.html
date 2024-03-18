@@ -8,41 +8,117 @@
     <body>
         <h1>My Firebase App</h1>
         <p>The quick brown fox jumps over the lazy dog.</p>
+
+        <h2>Google authentication with popup</h2>
+        <div>
+            <p>Sign in with your google account below.</p>
+            <button id="quickstart-sign-in">
+                Sign in with Google
+            </button>
+        </div>
+
+        <div>
+            Firebase sign-in status:
+            <span id="quickstart-sign-in-status">Unknown</span>
+            <div>Firebase auth<code>currentUser</code> object value:</div>
+            <pre><code id="quickstart-account-details">null</code></pre>
+            <div>Google OAuth Access Token:</div>
+            <pre><code id="oauth-access-token">null</code></pre>
+        </div>
+
         <script type="module">
             // Import the functions you need from the SDKs you need
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-            // import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
             // TODO: Add SDKs for Firebase products that you want to use
             // https://firebase.google.com/docs/web/setup#available-libraries
-            import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+            
+            import { getAuth, onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut
+                } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
             import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
           
             // Your web app's Firebase configuration
             // For Firebase JS SDK v7.20.0 and later, measurementId is optional
             const firebaseConfig = {
-              apiKey: "AIzaSyCG3j_2SCNByGsqjJUW_zZ_8iaeaQFiVrU",
-              authDomain: "auth0307.firebaseapp.com",
-              projectId: "auth0307",
-              storageBucket: "auth0307.appspot.com",
-              messagingSenderId: "220332328231",
-              appId: "1:220332328231:web:d303150760bc64126dd502",
-              measurementId: "G-YHSXG753C3"
+                apiKey: "AIzaSyCG3j_2SCNByGsqjJUW_zZ_8iaeaQFiVrU",
+                authDomain: "auth0307.firebaseapp.com",
+                projectId: "auth0307",
+                storageBucket: "auth0307.appspot.com",
+                messagingSenderId: "220332328231",
+                appId: "1:220332328231:web:7253c721fae6874b6dd502",
+                measurementId: "G-C2QFGVMBZW"
             };
           
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
-            // const analytics = getAnalytics(app);
+            const analytics = getAnalytics(app);
             const auth = getAuth(app);
             const db = getFirestore(app);
 
-            // Detect auth state.
-            onAuthStateChanged(auth, user => {
-                if(user != null) {
-                    console.log('logged in');
+            // Google sign-in.
+            const signInButton = document.getElementById('quickstart-sign-in');
+            const oauthToken = document.getElementById('quickstart-oauthtoken');
+            const signInStatus = document.getElementById('quickstart-sign-in-status');
+            const accountDetails = document.getElementById('quickstart-account-details');
+
+            // Function called when Login/Logout button is clicked.
+            function toggleSignIn() {
+                if(!auth.currentUser) {
+                    const provider = new GoogleAuthProvider();
+                    provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+                    signInWithPopup(auth,provider)
+                        .then( function (result) {
+                            if (!result) return;
+                            const credential = GoogleAuthProvider.credentialFromResult(result);
+                            // From the credential you can get an access token.
+                            const token = credential?.accessToken;
+                            const user = result.user;
+                            oauthToken.textContent = token ?? '';
+                        })
+                        .catch( function(err) {
+                            const errCode = err.code;
+                            const errMsg = err.message;
+                            const userEmail = err.email;
+                            const cred = err.credential;
+                            if (errCode == 'auth/account--exists-with-different-credential') {
+                                alert('You have already signed up with a different auth provider for that email.',);
+                                return;
+                            }
+                            signInStatus.textContent = 'Signed out';
+                            signInButton.textContent = 'Sign in with Google';
+                            accountDetails.textContent = null;
+                            if(oauthToken) {oauthToken.textContent = null;}               
+                        });
                     return;
                 }
-                console.log( 'no user');
+                signOut(auth);
+                signInButton.disabled = true;
+            }
+
+            // Detect auth state.
+            onAuthStateChanged(auth, user => {
+                if(user) {
+                    signInStatus.textContent = 'Signed in';
+                    signInButton.textContent = 'Sign out';
+                    accountDetails.textContent = JSON.stringify(user, null, '  ');
+                    return;
+                }
+                signInStatus.textContent = 'Signed out';
+                signInButton.textContent = 'Sign in with Google';
+                accountDetails.textContent = null;
+                if(oauthToken) {oauthToken.textContent = null}
+
+                signInButton.disabled = false;
             })
+            signInButton.addEventListener('click',toggleSignIn,false);
+
+            // Get city names from firestore.
+            async function getCities(db) {
+                const citiesCol = collection(db, 'cities');
+                const citySnapshot = await getDocs(citiesCol);
+                const cityList = citySnapshot.docs.map(doc => doc.data());
+                console.log(cityList);
+            }
           </script>
     </body>
 </html>
