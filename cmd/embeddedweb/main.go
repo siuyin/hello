@@ -6,10 +6,12 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/siuyin/hello/cmd/embeddedweb/public"
 )
 
 func main() {
-	//http.Handle("/", http.FileServer(http.FS(public.Content)))
-	http.Handle("/", http.FileServer(http.Dir("public")))
+	http.Handle("/", http.FileServer(http.FS(public.Content))) // import "github.com/siuyin/hello/cmd/embeddedweb/public"
+	//http.Handle("/", http.FileServer(http.Dir("public"))) // uncomment for quick develompent
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
