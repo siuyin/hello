@@ -3,10 +3,9 @@ apiVersion: skaffold/v4beta5
 kind: Config
 build:
   tagPolicy:
-    gitCommit: {
-      "variant": "AbbrevCommitSha",
-      "prefix": "em-"
-    }
+    gitCommit:
+      variant: AbbrevCommitSha
+      prefix: em-
   artifacts:
     # Skaffold will use this as your image name and push it here after building
     - image: siuyin/junk
