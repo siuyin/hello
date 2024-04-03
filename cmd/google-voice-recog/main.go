@@ -23,8 +23,9 @@ func main() {
 	defer client.Close()
 
 	// The path to the remote audio file to transcribe.
-	// fileURI := "gs://cloud-samples-data/speech/brooklyn_bridge.rawjj"
+	// fileURI := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
 	fn:="/home/siuyin/Music/audacity/export/turn_on_lights.mp3"
+	// fn:="/home/siuyin/Music/audacity/export/increase_aircon.mp3"
 
 	// Detects speech in the audio file.
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
