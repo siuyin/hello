@@ -1,4 +1,4 @@
-module example.com/test
+module github.com/siuyin/hello/cmd/apiwebsockets
 
 go 1.22.1
 

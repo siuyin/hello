@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/siuyin/dflt"
+	"github.com/siuyin/hello/cmd/apiwebsockets/internal/public"
 )
 
 func main() {
@@ -16,8 +17,8 @@ func main() {
 	// curl -X POST -d'{"color":"green"}' http://localhost:8080/color
 	// curl -X POST -d'{"color":"red"}' http://localhost:8080/color
 	http.HandleFunc("/color", colorHandler)
-	http.Handle("/", http.FileServer(http.Dir("./internal/public")))
-	// http.Handle("/", http.FileServer(http.FS(public.Content)))
+	// http.Handle("/", http.FileServer(http.Dir("./internal/public")))
+	http.Handle("/", http.FileServer(http.FS(public.Content)))
 
 	log.Fatal(http.ListenAndServe(":"+dflt.EnvString("HTTP_PORT", "8080"), nil))
 }
