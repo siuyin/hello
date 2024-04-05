@@ -20,7 +20,8 @@
     <button id="colorButton">Change Color (Grey)</button>
 
     <script>
-        const ws = new WebSocket("ws://localhost:8080/ws");
+        //const ws = new WebSocket("ws://localhost:8080/ws");
+        const ws = new WebSocket("wss://color-onsvm4sjba-as.a.run.app/ws");
         const button = document.getElementById("colorButton");
 
         ws.onmessage = (event) => {
