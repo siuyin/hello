@@ -7,4 +7,4 @@ require (
 	github.com/siuyin/dflt v0.0.0-20230329062002-0475f4d54412
 )
 
-require golang.org/x/net v0.17.0 // indirect
+require golang.org/x/net v0.23.0 // indirect
