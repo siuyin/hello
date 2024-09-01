@@ -39,6 +39,7 @@
             } else {
                 newColor = "grey";
             }
+            ws.send(`changing color to ${newColor}`);
 
             fetch(`/color`, {
                 method: "POST",

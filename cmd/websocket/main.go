@@ -52,7 +52,6 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	connections[c] = struct{}{}
 	for {
 		_, message, err := c.Read(context.Background())
-		//messageType, message, err := conn.ReadMessage()
 		if err != nil {
 			delete(connections, c)
 			break
