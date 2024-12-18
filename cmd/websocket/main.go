@@ -40,7 +40,7 @@ func webServer() {
 func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	c, err := websocket.Accept(w, r,
 		&websocket.AcceptOptions{
-			OriginPatterns: []string{"localhost:8080"},
+			OriginPatterns: []string{"localhost:?*"},
 		},
 	)
 	if err != nil {
